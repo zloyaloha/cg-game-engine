@@ -2,24 +2,18 @@
 #include <QOpenGLFunctions>
 #include <glm/gtc/matrix_transform.hpp>
 #include <QDebug>
+#include <iostream>
 
 struct Vertex {
     glm::vec3 position;
     glm::vec3 normal;
 };
 
-Cube::Cube(float size, const glm::vec3 &position) : 
-    size(size), position(position) {}
+Cube::Cube(float size, const glm::vec3 &position, const glm::vec3& color) : 
+    Shape(color), size(size), position(position) {}
 
 void Cube::initialize() {
     generateVertices();
-
-    shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/cubeVertexShader.glsl");
-    shaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/cubeFragmentShader.glsl");
-    if (!shaderProgram.link()) {
-        qDebug() << "Shader linking failed: " << shaderProgram.log();
-    }
-
 }
 
 void Cube::generateVertices()
@@ -98,7 +92,9 @@ void Cube::generateVertices()
         vertices[7], glm::vec3(0.0f, 0.0f, 1.0f),
         vertices[4], glm::vec3(0.0f, 0.0f, 1.0f)
     };
-    vao.create();
+    if (!vao.isCreated()) {
+        vao.create();
+    }
     vao.bind();
 
     vertexBuffer.create();
@@ -128,37 +124,26 @@ void Cube::setPosition(const glm::vec3& newPosition) {
 
 void Cube::draw()
 {
-    if (!shaderProgram.bind()) {
+    if (!shaderProgram->bind()) {
         qDebug() << "Failed to bind shader program.";
         return;
     }
     glm::mat4 modelMatrix = glm::mat4(1.0f);
     modelMatrix = glm::translate(modelMatrix, position);
 
-    shaderProgram.setUniformValue("view", QMatrix4x4(glm::value_ptr(_viewMatrix)).transposed());
-    shaderProgram.setUniformValue("model", QMatrix4x4(glm::value_ptr(modelMatrix)).transposed());
-    shaderProgram.setUniformValue("projection", QMatrix4x4(glm::value_ptr(_projectionMatrix)).transposed());
+    shaderProgram->setUniformValue("view", QMatrix4x4(glm::value_ptr(_viewMatrix)).transposed());
+    shaderProgram->setUniformValue("model", QMatrix4x4(glm::value_ptr(modelMatrix)).transposed());
+    shaderProgram->setUniformValue("projection", QMatrix4x4(glm::value_ptr(_projectionMatrix)).transposed());
+    shaderProgram->setUniformValue("objectColor", QVector3D(color.r, color.g, color.b));
+    shaderProgram->setUniformValue("lightPos", QVector3D(0.0f, 0.0f, -2.0f));
+    shaderProgram->setUniformValue("lightColor", QVector3D(1, 0, 1));
+    shaderProgram->setUniformValue("lightDir", QVector3D(1, 1, 1));
     vao.bind();
     if (!QOpenGLContext::currentContext()) {
         qDebug() << "No OpenGL context available.";
     }
     glDrawArrays(GL_TRIANGLES, 0, 36);
     vao.release();
-    shaderProgram.release();
+    shaderProgram->release();
     
-}
-
-void Cube::setViewMatrix(const glm::mat4 &viewMatrix) 
-{
-    _viewMatrix = viewMatrix;
-}
-
-void Cube::setModelMatrix(const glm::mat4 &modelMatrix) 
-{
-    _modelMatrix = modelMatrix;
-}
-
-void Cube::setProjectionMatrix(const glm::mat4 &projectionMatrix) 
-{
-    _projectionMatrix = projectionMatrix;
 }

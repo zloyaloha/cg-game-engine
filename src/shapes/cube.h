@@ -5,12 +5,9 @@
 class Cube : public Shape
 {
 public:
-    Cube(float size, const glm::vec3& position);
+    Cube(float size, const glm::vec3& position, const glm::vec3& color);
     void initialize() override;
     void draw() override;
-    void setModelMatrix(const glm::mat4& modelMatrix);
-    void setProjectionMatrix(const glm::mat4& projectionMatrix);
-    void setViewMatrix(const glm::mat4& viewMatrix);
 private:
     std::vector<glm::vec3> vertices;
     std::vector<GLuint> indices;

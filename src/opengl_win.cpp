@@ -1,44 +1,104 @@
 #include "opengl_win.h"
 #include <iostream>
 
-OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent) {
+OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent),
+    camera(glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+{
+    setFocusPolicy(Qt::StrongFocus);
+    this->setFocus();
+    std::fill(std::begin(keys), std::end(keys), false);
     QSurfaceFormat format;
     format.setDepthBufferSize(24);
     format.setStencilBufferSize(8);
     format.setVersion(4, 2); // Используйте OpenGL 3.3 Core
     format.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(format);
+
+}
+
+void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
+{
+    shape->setProjectionMatrix(projectionMatrix);
+    shape->setViewMatrix(viewMatrix);
+    std::cout << "Shape aded" << std::endl;
+    shape->setShader(shaderProgram);
+    shapes.push_back(shape);
+    // update();
 }
 
 void OpenGLWidget::initializeGL() {
+    shaderProgram = std::make_shared<QOpenGLShaderProgram>();
+    shaderProgram->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/cubeVertexShader.glsl");
+    shaderProgram->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/cubeFragmentShader.glsl");
+    if (!shaderProgram->link()) {
+        qDebug() << "Shader linking failed: " << shaderProgram->log();
+    }
     projectionMatrix = glm::perspective(glm::radians(45.0f), (float)width() / (float)height(), 0.1f, 100.0f);
     viewMatrix = glm::lookAt(glm::vec3(3.0f, 3.0f, 5.0f),
                              glm::vec3(0.0f, 0.0f, 0.0f),
                              glm::vec3(0.0f, 1.0f, 0.0f));
-
-    cube = new Cube(1.0f, glm::vec3(1.0f, 0.0f, -5.0f));
-
-    cube->initialize();
+    timer = new QTimer(this);
+    timer->setInterval(32);  // Интервал 16 мс (примерно 60 кадров в секунду)
+    connect(timer, SIGNAL(timeout()), this, SLOT(update()));
+    timer->start();
+    qDebug() << "Timer started";
 }
 
 void OpenGLWidget::resizeGL(int w, int h)
 {
-    glViewport(0, 0, w, h);  // Устанавливаем область рендеринга
+    glViewport(0, 0, w, h);
     projectionMatrix = glm::perspective(glm::radians(45.0f), (float)w / (float)h, 0.1f, 100.0f);
 }
 
 void OpenGLWidget::paintGL()
 {   
-    Cube* cube2 = new Cube(1.0f, glm::vec3(-1.0f, 0.0f, -5.0f));
-    cube2->initialize();
-
     glClearColor(1, 1, 1, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);  // Очистка экрана
-    cube->setProjectionMatrix(projectionMatrix);
-    cube->setViewMatrix(viewMatrix);
-    cube2->setProjectionMatrix(projectionMatrix);
-    cube2->setViewMatrix(viewMatrix);
+    updateCamera();
+    for (auto shape: shapes) {
+        shape->initialize();
+        shape->draw();
+    }
+}
 
-    cube2->draw();
-    cube->draw();
+void OpenGLWidget::keyPressEvent(QKeyEvent *event) {
+    keys[event->key()] = true;
+}
+
+void OpenGLWidget::keyReleaseEvent(QKeyEvent *event) {
+    updateCamera();
+    keys[event->key()] = false;
+}
+
+void OpenGLWidget::mouseMoveEvent(QMouseEvent *event) {
+    static float lastX = width() / 2.0f;
+    static float lastY = height() / 2.0f;
+
+    float xOffset = event->x() - lastX;
+    float yOffset = lastY - event->y();
+
+    lastX = event->x();
+    lastY = event->y();
+
+    camera.processMouseMovement(xOffset, yOffset);
+}
+
+void OpenGLWidget::updateCamera() {
+    float deltaTime = 0.1f;
+
+    if (keys[Qt::Key_W]) {
+        camera.processKeyboard(Qt::Key_W, deltaTime);
+    }
+    if (keys[Qt::Key_S]) {
+        camera.processKeyboard(Qt::Key_S, deltaTime);
+    }
+    if (keys[Qt::Key_A]) {
+        camera.processKeyboard(Qt::Key_A, deltaTime);
+    }
+    if (keys[Qt::Key_D]) {
+        camera.processKeyboard(Qt::Key_D, deltaTime);
+    }
+    for (const auto& shape: shapes) {
+        shape->setViewMatrix(camera.getViewMatrix());
+    }
 }

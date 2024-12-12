@@ -6,45 +6,62 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>438</width>
-    <height>396</height>
+    <width>670</width>
+    <height>599</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
-     <widget class="QOpenGLWidget" name="openGLWidget">
-      <property name="minimumSize">
-       <size>
-        <width>512</width>
-        <height>512</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>720</width>
-        <height>720</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-     </widget>
-    </item>
-   </layout>
+   <widget class="QWidget" name="">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>9</y>
+      <width>514</width>
+      <height>543</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QOpenGLWidget" name="openGLWidget">
+       <property name="minimumSize">
+        <size>
+         <width>512</width>
+         <height>512</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>720</width>
+         <height>720</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="addCube">
+       <property name="text">
+        <string>Добавить куб</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>438</width>
+     <width>670</width>
      <height>20</height>
     </rect>
    </property>
