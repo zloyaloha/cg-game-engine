@@ -2,5 +2,8 @@
     <qresource prefix="/shaders">
         <file alias="cubeVertexShader.glsl">shaders/cubeVertexShader.glsl</file>
         <file alias="cubeFragmentShader.glsl">shaders/cubeFragmentShader.glsl</file>
+
+        <file alias="meshVertexShader.glsl">shaders/meshVertexShader.glsl</file>
+        <file alias="meshFragmentShader.glsl">shaders/meshFragmentShader.glsl</file>
     </qresource>
 </RCC>

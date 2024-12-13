@@ -6,7 +6,7 @@
 class Camera {
 public:
     Camera(glm::vec3 position, glm::vec3 front, glm::vec3 up)
-        : Position(position), Front(front), Up(up), Speed(0.05f), Sensitivity(0.1f) {}
+        : Position(position), Front(front), Up(up), Speed(0.5f), Sensitivity(0.1f) {}
 
     void processKeyboard(int key, float deltaTime);
     void processMouseMovement(float xOffset, float yOffset, bool constrainPitch = true);

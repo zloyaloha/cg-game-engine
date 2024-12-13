@@ -1,5 +1,7 @@
 #pragma once
 #include <QMainWindow>
+#include <QFileDialog>
+#include <QMessageBox>
 #include "opengl_win.h"
 #include <memory>
 
@@ -16,7 +18,9 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 public slots:
+    void addLightButtonClicked();
     void addCubeButtonClicked();
+    void addMeshButtonClicked();
 private:
     int i{0};
     Ui::MainWindow* ui;

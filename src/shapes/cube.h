@@ -12,7 +12,6 @@ private:
     std::vector<glm::vec3> vertices;
     std::vector<GLuint> indices;
     float size;
-    glm::vec3 position;
     void generateVertices();
     void setPosition(const glm::vec3 &newPosition);
 };

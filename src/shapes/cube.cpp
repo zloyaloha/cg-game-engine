@@ -10,7 +10,7 @@ struct Vertex {
 };
 
 Cube::Cube(float size, const glm::vec3 &position, const glm::vec3& color) : 
-    Shape(color), size(size), position(position) {}
+    Shape(position, color, "cube"), size(size) {}
 
 void Cube::initialize() {
     generateVertices();
@@ -18,86 +18,80 @@ void Cube::initialize() {
 
 void Cube::generateVertices()
 {
-    GLfloat halfSize = size / 2.0f;
-
-    vertices = {
-        glm::vec3(-halfSize, -halfSize, -halfSize),  // 0
-        glm::vec3( halfSize, -halfSize, -halfSize),  // 1
-        glm::vec3( halfSize,  halfSize, -halfSize),  // 2
-        glm::vec3(-halfSize,  halfSize, -halfSize),  // 3
-        glm::vec3(-halfSize, -halfSize,  halfSize),  // 4
-        glm::vec3( halfSize, -halfSize,  halfSize),  // 5
-        glm::vec3( halfSize,  halfSize,  halfSize),  // 6
-        glm::vec3(-halfSize,  halfSize,  halfSize)   // 7
+    // if (vertexBuffer.isCreated()) {
+    //     return;  // Если буфер уже создан, не создаем заново
+    // }
+    float half = size / 2.0f;
+    
+    glm::vec3 vertices[] = {
+        glm::vec3(-half, -half, -half),  // 0
+        glm::vec3( half, -half, -half),  // 1
+        glm::vec3( half,  half, -half),  // 2
+        glm::vec3(-half,  half, -half),  // 3
+        glm::vec3(-half, -half,  half),  // 4
+        glm::vec3( half, -half,  half),  // 5
+        glm::vec3( half,  half,  half),  // 6
+        glm::vec3(-half,  half,  half)   // 7
     };
 
     glm::vec3 vertexData[] = {
-        // Задняя грань (нормаль по оси Z)
-        // Первый треугольник
+        // Задняя грань (нормаль (0.0f, 0.0f, -1.0f))
         vertices[0], glm::vec3(0.0f, 0.0f, -1.0f),
         vertices[1], glm::vec3(0.0f, 0.0f, -1.0f),
         vertices[2], glm::vec3(0.0f, 0.0f, -1.0f),
-        // Второй треугольник
         vertices[2], glm::vec3(0.0f, 0.0f, -1.0f),
         vertices[3], glm::vec3(0.0f, 0.0f, -1.0f),
         vertices[0], glm::vec3(0.0f, 0.0f, -1.0f),
 
-        // Левая грань (нормаль по оси X)
-        // Первый треугольник
+        // Передняя грань (нормаль (0.0f, 0.0f, 1.0f))
+        vertices[4], glm::vec3(0.0f, 0.0f, 1.0f),
+        vertices[5], glm::vec3(0.0f, 0.0f, 1.0f),
+        vertices[6], glm::vec3(0.0f, 0.0f, 1.0f),
+        vertices[6], glm::vec3(0.0f, 0.0f, 1.0f),
+        vertices[7], glm::vec3(0.0f, 0.0f, 1.0f),
+        vertices[4], glm::vec3(0.0f, 0.0f, 1.0f),
+
+        // Левая грань (нормаль (-1.0f, 0.0f, 0.0f))
         vertices[0], glm::vec3(-1.0f, 0.0f, 0.0f),
         vertices[3], glm::vec3(-1.0f, 0.0f, 0.0f),
         vertices[7], glm::vec3(-1.0f, 0.0f, 0.0f),
-        // Второй треугольник
         vertices[7], glm::vec3(-1.0f, 0.0f, 0.0f),
         vertices[4], glm::vec3(-1.0f, 0.0f, 0.0f),
         vertices[0], glm::vec3(-1.0f, 0.0f, 0.0f),
 
-        // Правая грань (нормаль по оси X)
-        // Первый треугольник
+        // Правая грань (нормаль (1.0f, 0.0f, 0.0f))
         vertices[1], glm::vec3(1.0f, 0.0f, 0.0f),
-        vertices[2], glm::vec3(1.0f, 0.0f, 0.0f),
-        vertices[6], glm::vec3(1.0f, 0.0f, 0.0f),
-        // Второй треугольник
-        vertices[6], glm::vec3(1.0f, 0.0f, 0.0f),
         vertices[5], glm::vec3(1.0f, 0.0f, 0.0f),
+        vertices[6], glm::vec3(1.0f, 0.0f, 0.0f),
+        vertices[6], glm::vec3(1.0f, 0.0f, 0.0f),
+        vertices[2], glm::vec3(1.0f, 0.0f, 0.0f),
         vertices[1], glm::vec3(1.0f, 0.0f, 0.0f),
 
-        // Нижняя грань (нормаль по оси Y)
-        // Первый треугольник
+        // Нижняя грань (нормаль (0.0f, -1.0f, 0.0f))
         vertices[0], glm::vec3(0.0f, -1.0f, 0.0f),
-        vertices[1], glm::vec3(0.0f, -1.0f, 0.0f),
-        vertices[5], glm::vec3(0.0f, -1.0f, 0.0f),
-        // Второй треугольник
-        vertices[5], glm::vec3(0.0f, -1.0f, 0.0f),
         vertices[4], glm::vec3(0.0f, -1.0f, 0.0f),
+        vertices[5], glm::vec3(0.0f, -1.0f, 0.0f),
+        vertices[5], glm::vec3(0.0f, -1.0f, 0.0f),
+        vertices[1], glm::vec3(0.0f, -1.0f, 0.0f),
         vertices[0], glm::vec3(0.0f, -1.0f, 0.0f),
 
-        // Верхняя грань (нормаль по оси Y)
-        // Первый треугольник
+        // Верхняя грань (нормаль (0.0f, 1.0f, 0.0f))
         vertices[3], glm::vec3(0.0f, 1.0f, 0.0f),
         vertices[2], glm::vec3(0.0f, 1.0f, 0.0f),
         vertices[6], glm::vec3(0.0f, 1.0f, 0.0f),
-        // Второй треугольник
         vertices[6], glm::vec3(0.0f, 1.0f, 0.0f),
         vertices[7], glm::vec3(0.0f, 1.0f, 0.0f),
-        vertices[3], glm::vec3(0.0f, 1.0f, 0.0f),
-
-        // Передняя грань (нормаль по оси Z)
-        // Первый треугольник
-        vertices[4], glm::vec3(0.0f, 0.0f, 1.0f),
-        vertices[5], glm::vec3(0.0f, 0.0f, 1.0f),
-        vertices[6], glm::vec3(0.0f, 0.0f, 1.0f),
-        // Второй треугольник
-        vertices[6], glm::vec3(0.0f, 0.0f, 1.0f),
-        vertices[7], glm::vec3(0.0f, 0.0f, 1.0f),
-        vertices[4], glm::vec3(0.0f, 0.0f, 1.0f)
+        vertices[3], glm::vec3(0.0f, 1.0f, 0.0f)
     };
+
     if (!vao.isCreated()) {
         vao.create();
     }
     vao.bind();
 
-    vertexBuffer.create();
+    if (!vertexBuffer.isCreated()) {
+        vertexBuffer.create();
+    }
     vertexBuffer.bind();
     vertexBuffer.allocate(vertexData, sizeof(vertexData));
 
@@ -107,14 +101,14 @@ void Cube::generateVertices()
         return;
     }
 
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void*>(0));
     f->glEnableVertexAttribArray(0);
 
-    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), reinterpret_cast<void*>(3 * sizeof(float)));
     f->glEnableVertexAttribArray(1);
 
-    vao.release();
-    vertexBuffer.release();
+    // vao.release();
+    // vertexBuffer.release();
 }
 
 
@@ -128,22 +122,21 @@ void Cube::draw()
         qDebug() << "Failed to bind shader program.";
         return;
     }
-    glm::mat4 modelMatrix = glm::mat4(1.0f);
-    modelMatrix = glm::translate(modelMatrix, position);
-
-    shaderProgram->setUniformValue("view", QMatrix4x4(glm::value_ptr(_viewMatrix)).transposed());
-    shaderProgram->setUniformValue("model", QMatrix4x4(glm::value_ptr(modelMatrix)).transposed());
-    shaderProgram->setUniformValue("projection", QMatrix4x4(glm::value_ptr(_projectionMatrix)).transposed());
-    shaderProgram->setUniformValue("objectColor", QVector3D(color.r, color.g, color.b));
-    shaderProgram->setUniformValue("lightPos", QVector3D(0.0f, 0.0f, -2.0f));
-    shaderProgram->setUniformValue("lightColor", QVector3D(1, 0, 1));
-    shaderProgram->setUniformValue("lightDir", QVector3D(1, 1, 1));
+    loadMatriciesToShader();
+    loadLightsToShader();
+    loadObjectLightToShader();
+    QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
+    if (!f) {
+        qDebug() << "Failed to get OpenGL functions.";
+        return;
+    }
     vao.bind();
+    vertexBuffer.bind();
     if (!QOpenGLContext::currentContext()) {
         qDebug() << "No OpenGL context available.";
     }
-    glDrawArrays(GL_TRIANGLES, 0, 36);
-    vao.release();
+    f->glDrawArrays(GL_TRIANGLES, 0, 36);
+    // vertexBuffer.release();
+    // vao.release();
     shaderProgram->release();
-    
 }

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.9)
-project(game-engine)
+project(game_engine)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(src)
 include_directories(src/shapes)
+include_directories(tinyobjloader)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -16,6 +17,7 @@ endif()
 
 # Правильное подключение компонентов Qt6
 find_package(Qt6 COMPONENTS Widgets OpenGLWidgets REQUIRED)
+find_package(assimp REQUIRED)
 
 set(WINDOWS_SRC
     src/main.cpp
@@ -27,17 +29,20 @@ set(WINDOWS_SRC
 set(SHAPES_SRC
     src/shapes/cube.cpp
     src/shapes/shape.cpp
+    src/shapes/mesh.cpp
 )
 
 set(RESOURCES
     src/resources/resourses.qrc
 )
 
+add_subdirectory(tinyobjloader)
+
 qt_add_resources(RESOURCES_GENERATED ${RESOURCES})
 
 add_library(shapes STATIC ${SHAPES_SRC})
 
-target_link_libraries(shapes Qt6::Core Qt6::OpenGL)
+target_link_libraries(shapes Qt6::Core Qt6::OpenGL tinyobjloader assimp::assimp)
 
 qt6_wrap_ui(UI_HEADERS src/mainwindow.ui)
 

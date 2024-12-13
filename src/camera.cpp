@@ -1,5 +1,5 @@
 #include "camera.h"
-
+#include <QDebug>
 void Camera::processKeyboard(int key, float deltaTime) {
     float velocity = Speed * deltaTime;
 
@@ -40,5 +40,6 @@ void Camera::processMouseMovement(float xOffset, float yOffset, bool constrainPi
 }
 
 glm::mat4 Camera::getViewMatrix() {
-    return glm::lookAt(glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    return glm::lookAt(Position, (Position + Front), Up);
+    // return glm::lookAt(glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 }
