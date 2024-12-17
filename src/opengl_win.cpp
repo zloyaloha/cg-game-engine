@@ -4,20 +4,21 @@
 OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent),
     camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
 {
+    aspectRatio = float(height()) / float(width());
     setFocusPolicy(Qt::StrongFocus);
     this->setFocus();
     std::fill(std::begin(keys), std::end(keys), false);
     QSurfaceFormat format;
     format.setDepthBufferSize(24);
     format.setStencilBufferSize(8);
-    format.setVersion(4, 2); // Используйте OpenGL 3.3 Core
+    format.setVersion(4, 2);
     format.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(format);
 }
 
 void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
 {
-    shape->setProjectionMatrix(projectionMatrix);
+    shape->setProjectionMatrix(camera.getProjectionMatrix(aspectRatio));
     shape->setViewMatrix(camera.getViewMatrix());
     shape->setShader(shaders[shape->getType()]);
     shapes.push_back(shape);
@@ -61,16 +62,12 @@ void OpenGLWidget::initializeGL() {
     f->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     f->glEnable(GL_DEPTH_TEST);
     f->glEnable(GL_PROGRAM_POINT_SIZE);
-
-    projectionMatrix = glm::perspective(glm::radians(45.0f), (float)width() / (float)height(), 0.1f, 100.0f);
-
     setTimer();
 }
 
 void OpenGLWidget::resizeGL(int w, int h)
 {
     glViewport(0, 0, w, h);
-    projectionMatrix = glm::perspective(glm::radians(45.0f), (float)w / (float)h, 0.1f, 100.0f);
 }
 
 void OpenGLWidget::paintGL()
@@ -80,6 +77,7 @@ void OpenGLWidget::paintGL()
     updateCamera();
     for (auto shape: shapes) {
         shape->setViewMatrix(camera.getViewMatrix());
+        shape->setProjectionMatrix(camera.getProjectionMatrix((float)width() / (float)height()));
         shape->initialize();
         shape->draw();
     }
@@ -95,16 +93,20 @@ void OpenGLWidget::keyReleaseEvent(QKeyEvent *event) {
 }
 
 void OpenGLWidget::mouseMoveEvent(QMouseEvent *event) {
-    static float lastX = width() / 2.0f;
-    static float lastY = height() / 2.0f;
+    float xOffset = event->position().x() - lastX;
+    float yOffset = lastY - event->position().y();
 
-    float xOffset = event->x() - lastX;
-    float yOffset = lastY - event->y();
-
-    lastX = event->x();
-    lastY = event->y();
+    lastX = event->position().x();
+    lastY = event->position().y();
 
     camera.processMouseMovement(xOffset, yOffset);
+}
+
+void OpenGLWidget::wheelEvent(QWheelEvent *event)
+{
+    float yOffset = event->angleDelta().y() / 120.0f;
+    camera.processMouseScroll(yOffset);
+    update();
 }
 
 void OpenGLWidget::updateCamera() {

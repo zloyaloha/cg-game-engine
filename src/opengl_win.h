@@ -33,6 +33,7 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 private:
     Camera camera;
     bool keys[256];
@@ -43,6 +44,8 @@ private:
     QOpenGLContext* m_context;
     QOpenGLFunctions_4_3_Core* m_funcs;
     float rotationAngle;
+    float aspectRatio;
+    float lastX{0}, lastY{0};
 
     std::vector<std::shared_ptr<Light>> lights;
     std::vector<std::shared_ptr<Shape>> shapes;
