@@ -4,6 +4,7 @@
 #include <QMessageBox>
 #include "opengl_win.h"
 #include <memory>
+#include "obj_loader.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

@@ -12,9 +12,8 @@
 
 class Mesh : public Shape {
 public:
+    friend class ObjLoader;
     Mesh(const glm::vec3 &position, const glm::vec3& color);
-
-    bool loadFromFile(const std::string& filepath);
 
     void initialize() override;
 
