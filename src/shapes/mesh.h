@@ -32,5 +32,9 @@ private:
     QOpenGLBuffer textureBuffer{QOpenGLBuffer::VertexBuffer};
     QOpenGLBuffer indexBuffer{QOpenGLBuffer::IndexBuffer};
 
+    GLuint pos;
+    GLuint normal;
+    GLuint tex;
+
     QOpenGLVertexArrayObject vao;
 };

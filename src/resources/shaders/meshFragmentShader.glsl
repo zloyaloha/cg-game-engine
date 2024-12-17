@@ -19,20 +19,32 @@ uniform int numLights;
 uniform vec3 objectColor;
 
 void main() {
-    // vec3 norm = normalize(Normal);
-    // vec3 resultColor = vec3(0.0); 
+     // Нормализация нормали фрагмента
+    vec3 norm = normalize(Normal);
 
-    // for (int i = 0; i < numLights; ++i) {
-    //     vec3 lightVec = normalize(lightPos[i]-lightPointTo[i]);
+    // Получение цвета из текстуры
+    vec4 texColor = texture(texture1, TexCoord);
 
-    //     float diff = max(dot(norm, lightVec), 0.0);
-    //     vec3 diffuse = diff * lightColor[i] * objectColor;
+    // Инициализация итогового цвета (изначально амбиентное освещение)
+    vec3 resultColor = vec3(0.0);
+    
+    // Амбиентное освещение: небольшое освещение, чтобы объект не был черным
+    for (int i = 0; i < numLights; ++i) {
+        // Направление от фрагмента к источнику света
+        vec3 lightVec = normalize(lightPos[i] - FragPos);
+        
+        // Диффузная составляющая (реакция на свет)
+        float diff = max(dot(norm, lightVec), 0.0);
+        vec3 diffuse = diff * lightColor[i] * objectColor; // Умножаем на цвет объекта (или текстуру)
 
-    //     vec3 ambient = 0.1 * lightColor[i] * objectColor;
+        // Амбиентное освещение: небольшое освещение от света
+        vec3 ambient = 0.1 * lightColor[i] * objectColor;
 
-    //     resultColor += diffuse + ambient;
-    // }
+        // Суммируем результаты для всех источников света
+        resultColor += diffuse + ambient;
+    }
 
-    // FragColor = vec4(resultColor, 1.0);
-    FragColor = texture(texture1, TexCoord);
+    // Применяем освещение и текстуру (цвет из текстуры умножается на освещенность)
+    FragColor = vec4(resultColor * texColor.rgb, 1); 
+    // FragColor = texture(texture1, TexCoord);
 }

@@ -15,43 +15,36 @@ void Mesh::initialize() {
     }
     vao.bind();
 
+    shaderProgram->bind();
+    pos = shaderProgram->attributeLocation("aPos");
+    normal = shaderProgram->attributeLocation("aNormal");
+    tex = shaderProgram->attributeLocation("aTexCoord");
+
     // Буфер текстурных координат
     textureBuffer.create();
     textureBuffer.bind();
     textureBuffer.allocate(&texCoords[0], texCoords.size() * sizeof(glm::vec2));
-    textureBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    textureBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    shaderProgram->enableAttributeArray(tex);
+    shaderProgram->setAttributeBuffer(tex, GL_FLOAT, 0, 2);
 
     normalBuffer.create();
     normalBuffer.bind();
     normalBuffer.allocate(&normals[0], normals.size() * sizeof(glm::vec3));
-    normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    normalBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    shaderProgram->enableAttributeArray(normal);
+    shaderProgram->setAttributeBuffer(normal, GL_FLOAT, 0, 3);
 
     vertexBuffer.create();
     vertexBuffer.bind();
     vertexBuffer.allocate(&vertices[0], vertices.size() * sizeof(glm::vec3));
-    vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    vertexBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    shaderProgram->enableAttributeArray(pos);
+    shaderProgram->setAttributeBuffer(pos, GL_FLOAT, 0, 3);
 
-
-    // Инициализация буфера для индексов
     indexBuffer.create();
     indexBuffer.bind();
     indexBuffer.allocate(&indices[0], indices.size() * sizeof(unsigned int));
-
-
-    // Получение функции OpenGL для дальнейшей работы с аттрибутами
-    QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
-    
-    // Настройка аттрибутов для текстурных координат (Location 2)
-    f->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-    f->glEnableVertexAttribArray(2);
-
-    // Настройка аттрибутов для нормалей (Location 1)
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    f->glEnableVertexAttribArray(0);
-
-    // Настройка аттрибутов для вершин (Location 0)
-    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    f->glEnableVertexAttribArray(1);
 }
 
 void Mesh::draw() {
@@ -76,12 +69,11 @@ void Mesh::draw() {
     }
 
     vao.bind();
-    std::cout << indices.size() << std::endl;
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
     vao.release();
     vertexBuffer.release();
     textureBuffer.release();
-    normalBuffer.release();  // Не забудьте освободить normalBuffer
+    normalBuffer.release();
     indexBuffer.release();
 
     shaderProgram->release();
