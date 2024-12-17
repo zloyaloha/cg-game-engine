@@ -36,13 +36,11 @@ set(RESOURCES
     src/resources/resourses.qrc
 )
 
-add_subdirectory(tinyobjloader)
-
 qt_add_resources(RESOURCES_GENERATED ${RESOURCES})
 
 add_library(shapes STATIC ${SHAPES_SRC})
 
-target_link_libraries(shapes Qt6::Core Qt6::OpenGL tinyobjloader assimp::assimp)
+target_link_libraries(shapes Qt6::Core Qt6::OpenGL assimp::assimp)
 
 qt6_wrap_ui(UI_HEADERS src/mainwindow.ui)
 
