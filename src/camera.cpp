@@ -39,7 +39,21 @@ void Camera::processMouseMovement(float xOffset, float yOffset, bool constrainPi
     Front = glm::normalize(front);
 }
 
+void Camera::processMouseScroll(float yOffset) {
+    FOV -= yOffset;
+    
+    if (FOV < 30.0f) {
+        FOV = 30.0f;
+    }
+    if (FOV > 120.0f) {
+        FOV = 120.0f;
+    }
+}
+
 glm::mat4 Camera::getViewMatrix() {
     return glm::lookAt(Position, (Position + Front), Up);
-    // return glm::lookAt(glm::vec3(3.0f, 3.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+}
+
+glm::mat4 Camera::getProjectionMatrix(float aspectRatio) {
+    return glm::perspective(glm::radians(FOV), aspectRatio, Near, Far);
 }
