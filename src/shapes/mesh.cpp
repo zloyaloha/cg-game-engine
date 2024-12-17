@@ -2,7 +2,7 @@
 #include <QOpenGLFunctions>
 #include <iostream>
 
-Mesh::Mesh(const glm::vec3 &position, const glm::vec3& color) : Shape(position, color, "mesh") {}
+Mesh::Mesh(const glm::vec3 &position) : Shape(position, "mesh") {}
 
 void Mesh::initialize() {
     if (!vao.isCreated()) {
@@ -44,6 +44,12 @@ void Mesh::initialize() {
 }
 
 void Mesh::draw() {
+    // std::shared_ptr<Material> material = std::make_shared<Material>();
+    // material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
+    // material->diffuseColor = glm::vec3(0.6f, 0.6f, 0.6f);  // Тусклый диффузный цвет
+    // material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Нет зеркальных отражений (матовый)
+    // material->shininess = 10.0f;  // Шершавость поверхности, меньше — более матовая
+    this->setMaterial(material);
     if (!shaderProgram->bind()) {
         qDebug() << "Failed to bind shader program.";
         return;
@@ -54,19 +60,10 @@ void Mesh::draw() {
     textureBuffer.bind();
     vertexBuffer.bind();
 
-    this->loadMatriciesToShader();
-    this->loadLightsToShader();
-    this->loadObjectLightToShader();
-
-    if (textures.size() != 0) {
-        QOpenGLTexture *texture = textures[0].texture;
-        texture->bind();
-        // texture->setWrapMode(QOpenGLTexture::DirectionS, QOpenGLTexture::MirroredRepeat);
-        // texture->setWrapMode(QOpenGLTexture::DirectionT, QOpenGLTexture::MirroredRepeat);
-        // texture->setMinificationFilter(QOpenGLTexture::Linear);
-        // texture->setMagnificationFilter(QOpenGLTexture::Linear);ис
-        shaderProgram->setUniformValue("texture1", 0);
-    }
+    loadMatriciesToShader();
+    loadLightsToShader();
+    loadMaterialToShader();
+    loadTextureToShader();
 
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
     vao.release();
@@ -75,4 +72,27 @@ void Mesh::draw() {
     textureBuffer.release();
     vertexBuffer.release();
     shaderProgram->release();
+}
+
+void Mesh::loadTextureToShader()
+{
+    bool useDiffuse = false;
+    bool useSpecular = false;
+    int i = 0;
+    for (const auto& texture : textures) {
+        if (texture.type == aiTextureType_DIFFUSE) {
+            glActiveTexture(GL_TEXTURE0);
+            texture.texture->bind();
+            shaderProgram->setUniformValue("diffuseTexture", 0);
+            useDiffuse = true;
+        } else if (texture.type == aiTextureType_SPECULAR) {
+            glActiveTexture(GL_TEXTURE1);
+            texture.texture->bind();
+            shaderProgram->setUniformValue("specularTexture", 1);
+            useSpecular = true;
+        }
+    }
+
+    shaderProgram->setUniformValue("useDiffuseTexture", useDiffuse);
+    shaderProgram->setUniformValue("useSpecularTexture", useSpecular);
 }

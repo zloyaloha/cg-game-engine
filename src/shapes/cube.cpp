@@ -9,8 +9,8 @@ struct Vertex {
     glm::vec3 normal;
 };
 
-Cube::Cube(float size, const glm::vec3 &position, const glm::vec3& color) : 
-    Shape(position, color, "cube"), size(size) {}
+Cube::Cube(float size, const glm::vec3 &position) : 
+    Shape(position, "cube"), size(size) {}
 
 void Cube::initialize() {
     generateVertices();
@@ -122,21 +122,22 @@ void Cube::draw()
         qDebug() << "Failed to bind shader program.";
         return;
     }
+    vao.bind();
+
     loadMatriciesToShader();
     loadLightsToShader();
-    loadObjectLightToShader();
+    loadMaterialToShader();
+
     QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
     if (!f) {
         qDebug() << "Failed to get OpenGL functions.";
         return;
     }
-    vao.bind();
     vertexBuffer.bind();
     if (!QOpenGLContext::currentContext()) {
         qDebug() << "No OpenGL context available.";
     }
     f->glDrawArrays(GL_TRIANGLES, 0, 36);
-    // vertexBuffer.release();
-    // vao.release();
+    vao.release();
     shaderProgram->release();
 }

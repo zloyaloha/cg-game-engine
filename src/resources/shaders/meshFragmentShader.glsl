@@ -2,49 +2,60 @@
 
 in vec3 FragPos;  
 in vec3 Normal; 
-in vec2 TexCoord;
+in vec2 TexCoords;
 
 out vec4 FragColor;
 
 uniform vec3 viewPos;  // Позиция камеры
-uniform sampler2D texture1;
+uniform sampler2D textureSampler;
 
 const int MAX_LIGHTS = 10;
 
-uniform vec3 lightPos[MAX_LIGHTS];
-uniform vec3 lightColor[MAX_LIGHTS];
-uniform vec3 lightPointTo[MAX_LIGHTS];
+struct Light {
+    vec3 lightPos;
+    vec3 lightColor;
+    vec3 lightPointTo;
+};
+
+struct Material {
+    vec3 ambientColor;
+    vec3 diffuseColor;
+    vec3 specularColor;
+    float shininess;
+};
+
+uniform Light lights[MAX_LIGHTS];
 uniform int numLights;
 
-uniform vec3 objectColor;
+uniform Material material;
 
-void main() {
-     // Нормализация нормали фрагмента
+void main()
+{
     vec3 norm = normalize(Normal);
-
-    // Получение цвета из текстуры
-    vec4 texColor = texture(texture1, TexCoord);
-
-    // Инициализация итогового цвета (изначально амбиентное освещение)
-    vec3 resultColor = vec3(0.0);
     
-    // Амбиентное освещение: небольшое освещение, чтобы объект не был черным
+    vec3 texColor = texture(textureSampler, TexCoords).rgb;
+    
+    vec3 resultColor = vec3(0.0); 
+
     for (int i = 0; i < numLights; ++i) {
-        // Направление от фрагмента к источнику света
-        vec3 lightVec = normalize(lightPos[i] - FragPos);
-        
-        // Диффузная составляющая (реакция на свет)
+        vec3 lightVec = normalize(lights[i].lightPos - FragPos);
+
         float diff = max(dot(norm, lightVec), 0.0);
-        vec3 diffuse = diff * lightColor[i] * objectColor; // Умножаем на цвет объекта (или текстуру)
+        vec3 diffuse = diff * texColor * material.diffuseColor * lights[i].lightColor;
 
-        // Амбиентное освещение: небольшое освещение от света
-        vec3 ambient = 0.1 * lightColor[i] * objectColor;
+        vec3 ambient = material.ambientColor * lights[i].lightColor * 0.1;
 
-        // Суммируем результаты для всех источников света
-        resultColor += diffuse + ambient;
+        vec3 viewDir = normalize(viewPos - FragPos);
+        
+        vec3 reflectDir = reflect(-lightVec, norm);
+        
+        float spec = pow(max(dot(norm, viewDir), 0.0), material.shininess);
+        vec3 specular = spec * material.specularColor * lights[i].lightColor;
+
+        resultColor += diffuse + ambient + specular;
     }
+    resultColor = min(resultColor, vec3(1.0));
 
-    // Применяем освещение и текстуру (цвет из текстуры умножается на освещенность)
-    FragColor = vec4(resultColor * texColor.rgb, 1); 
-    // FragColor = texture(texture1, TexCoord);
+    // Выводим итоговый цвет с учетом текстуры и освещения
+    FragColor = vec4(resultColor, 1.0);
 }

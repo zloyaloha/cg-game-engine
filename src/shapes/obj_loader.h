@@ -9,6 +9,7 @@
 class ObjLoader {
 public:
     std::vector<std::shared_ptr<Mesh>> load(const std::string& filepath);
+    void parseMaterial(const aiMaterial *material, std::shared_ptr<Mesh> &mesh);
     QOpenGLTexture *loadTexture(const std::string &texturePath);
 };
 

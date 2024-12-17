@@ -13,11 +13,13 @@
 class Mesh : public Shape {
 public:
     friend class ObjLoader;
-    Mesh(const glm::vec3 &position, const glm::vec3& color);
+    Mesh(const glm::vec3 &position);
 
     void initialize() override;
 
     void draw() override;
+
+    void loadTextureToShader();
 
 private:
     std::vector<glm::vec3> vertices;

@@ -18,6 +18,14 @@ struct Light {
     glm::vec3 color;
 };
 
+struct Material {
+    glm::vec3 ambientColor;
+    glm::vec3 diffuseColor;
+    glm::vec3 specularColor;
+    float shininess;
+    float opacity;
+};
+
 struct Texture {
     QOpenGLTexture* texture;
     aiTextureType type;
@@ -25,28 +33,32 @@ struct Texture {
 
 class Shape {
     public:
-        Shape(const glm::vec3& position, const glm::vec3& color, const std::string& type);
+        Shape(const glm::vec3& position, const std::string& type);
         virtual ~Shape() {}
 
         virtual void initialize() = 0;  // Абстрактный метод для инициализации данных
         virtual void draw() = 0;        // Абстрактный метод для рендеринга
+
         void setModelMatrix(const glm::mat4& modelMatrix);
         void setProjectionMatrix(const glm::mat4& projectionMatrix);
         void setViewMatrix(const glm::mat4& viewMatrix);
         void setShader(std::shared_ptr<QOpenGLShaderProgram> shader);
-        void setColor(const glm::vec3& color);
+        void setMaterial(std::shared_ptr<Material> material);
+
         void loadMatriciesToShader();
         void loadLightsToShader();
-        void loadObjectLightToShader();
+        void loadMaterialToShader();
+
         void setLights(const std::vector<std::shared_ptr<Light>>& light);
         std::string getType() const;
     protected:
         std::vector<std::shared_ptr<Light>> lights;
+        std::shared_ptr<Material> material;
+
         glm::vec3 position;
         std::shared_ptr<QOpenGLShaderProgram> shaderProgram;
         QOpenGLBuffer vertexBuffer;
         QOpenGLVertexArrayObject vao;
-        glm::vec3 color;
         glm::mat4 _modelMatrix;
         glm::mat4 _projectionMatrix;
         glm::mat4 _viewMatrix;
