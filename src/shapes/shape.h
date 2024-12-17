@@ -1,5 +1,4 @@
 #pragma once
-#include "tiny_obj_loader.h"
 #include <vector>
 #include <string>
 #include <QOpenGLBuffer>
@@ -53,17 +52,3 @@ class Shape {
         glm::mat4 _viewMatrix;
         std::string type;
 };
-
-
-class ObjLoader {
-public:
-    bool load(const std::string& filepath,
-              std::vector<glm::vec3>& vertices,
-              std::vector<glm::vec3>& normals,
-              std::vector<glm::vec2>& texCoords,
-              std::vector<unsigned int>& indices,
-              std::vector<Texture>& textures);
-    QOpenGLTexture *loadTexture(const std::string &texturePath);
-    GLuint createTexture(const QImage &image);
-};
-

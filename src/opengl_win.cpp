@@ -13,7 +13,6 @@ OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent),
     format.setVersion(4, 2); // Используйте OpenGL 3.3 Core
     format.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(format);
-
 }
 
 void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
@@ -21,7 +20,6 @@ void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
     shape->setProjectionMatrix(projectionMatrix);
     shape->setViewMatrix(camera.getViewMatrix());
     shape->setShader(shaders[shape->getType()]);
-    shape->initialize();
     shapes.push_back(shape);
     setLigths();
     update();
@@ -59,7 +57,13 @@ void OpenGLWidget::setTimer() {
 
 void OpenGLWidget::initializeGL() {
     createShaders();
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    f->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    f->glEnable(GL_DEPTH_TEST);
+    f->glEnable(GL_PROGRAM_POINT_SIZE);
+
     projectionMatrix = glm::perspective(glm::radians(45.0f), (float)width() / (float)height(), 0.1f, 100.0f);
+
     setTimer();
 }
 
@@ -71,9 +75,8 @@ void OpenGLWidget::resizeGL(int w, int h)
 
 void OpenGLWidget::paintGL()
 {   
-    glClearColor(1, 1, 1, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     updateCamera();
     for (auto shape: shapes) {
         shape->setViewMatrix(camera.getViewMatrix());

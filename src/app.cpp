@@ -36,10 +36,12 @@ void MainWindow::addMeshButtonClicked()
 
     if (QFile::exists(filePath)) {
         qDebug() << "Load mesh from " << filePath;
-        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(glm::vec3(0.0f, 0.0f, 1.0f + i), glm::vec3(1.0, 1.0, 1.0));
-        mesh->loadFromFile(filePath.toStdString());
-        openglWidget->addShape(mesh);
-        i += 1;
+        ObjLoader loader;
+        std::vector<std::shared_ptr<Mesh>> meshes = loader.load(filePath.toStdString());
+        for (const auto mesh: meshes) {
+            openglWidget->addShape(mesh);
+        }
+        qDebug() << "Add" << meshes.size() << "meshes!";
     }
 }
 

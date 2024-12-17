@@ -4,11 +4,6 @@
 
 Mesh::Mesh(const glm::vec3 &position, const glm::vec3& color) : Shape(position, color, "mesh") {}
 
-bool Mesh::loadFromFile(const std::string& filepath) {
-    ObjLoader loader;
-    return loader.load(filepath, vertices, normals, texCoords, indices, textures);
-}
-
 void Mesh::initialize() {
     if (!vao.isCreated()) {
         vao.create();
@@ -20,7 +15,6 @@ void Mesh::initialize() {
     normal = shaderProgram->attributeLocation("aNormal");
     tex = shaderProgram->attributeLocation("aTexCoord");
 
-    // Буфер текстурных координат
     textureBuffer.create();
     textureBuffer.bind();
     textureBuffer.allocate(&texCoords[0], texCoords.size() * sizeof(glm::vec2));
@@ -45,6 +39,8 @@ void Mesh::initialize() {
     indexBuffer.create();
     indexBuffer.bind();
     indexBuffer.allocate(&indices[0], indices.size() * sizeof(unsigned int));
+    indexBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    vao.release();
 }
 
 void Mesh::draw() {
@@ -52,29 +48,31 @@ void Mesh::draw() {
         qDebug() << "Failed to bind shader program.";
         return;
     }
+    vao.bind();
+    indexBuffer.bind();
+    normalBuffer.bind();
+    textureBuffer.bind();
+    vertexBuffer.bind();
 
-    loadMatriciesToShader();
-    loadLightsToShader();
-    loadObjectLightToShader();
+    this->loadMatriciesToShader();
+    this->loadLightsToShader();
+    this->loadObjectLightToShader();
 
-    QOpenGLFunctions* f = QOpenGLContext::currentContext()->functions();
-    f->glActiveTexture(GL_TEXTURE0);
     if (textures.size() != 0) {
-        f->glBindTexture(GL_TEXTURE_2D, textures[0].texture->textureId());
-        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); 
+        QOpenGLTexture *texture = textures[0].texture;
+        texture->bind();
+        // texture->setWrapMode(QOpenGLTexture::DirectionS, QOpenGLTexture::MirroredRepeat);
+        // texture->setWrapMode(QOpenGLTexture::DirectionT, QOpenGLTexture::MirroredRepeat);
+        // texture->setMinificationFilter(QOpenGLTexture::Linear);
+        // texture->setMagnificationFilter(QOpenGLTexture::Linear);ис
         shaderProgram->setUniformValue("texture1", 0);
     }
 
-    vao.bind();
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
     vao.release();
-    vertexBuffer.release();
-    textureBuffer.release();
-    normalBuffer.release();
     indexBuffer.release();
-
+    normalBuffer.release();
+    textureBuffer.release();
+    vertexBuffer.release();
     shaderProgram->release();
 }
