@@ -30,6 +30,7 @@ set(SHAPES_SRC
     src/shapes/cube.cpp
     src/shapes/shape.cpp
     src/shapes/mesh.cpp
+    src/shapes/obj_loader.cpp
 )
 
 set(RESOURCES
