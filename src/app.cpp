@@ -26,8 +26,8 @@ void MainWindow::addCubeButtonClicked()
 
     std::shared_ptr<Material> material = std::make_shared<Material>();
     material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
-    material->diffuseColor = glm::vec3(0.6f, 0.6f, 0.6f);  // Тусклый диффузный цвет
-    material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Нет зеркальных отражений (матовый)
+    material->diffuseColor = glm::vec3(0.5f, 0.5f, 0.5f);  // Тусклый диффузный цвет
+    material->specularColor = glm::vec3(0.5f, 0.5f, 0.5f);  // Нет зеркальных отражений (матовый)
     material->shininess = 10.0f;  // Шершавость поверхности, меньше — более матовая
 
     // material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
@@ -94,11 +94,11 @@ void MainWindow::addLightButtonClicked()
     );
 
     std::shared_ptr<Light> dirLight = std::make_shared<DirectionalLight>(
-        glm::vec3(0.0f, -1.0f, 0.0f)      // Направление света (например, вниз)
+        glm::vec3(-1.0f, -1.0f, -1.0f)      // Направление света (например, вниз)
     );
-    openglWidget->addLight(spotLight);
     // openglWidget->addLight(spotLight);
-    // openglWidget->addLight(dirLight);
+    // openglWidget->addLight(spotLight);
+    openglWidget->addLight(spotLight);
 }
 
 MainWindow::~MainWindow() 
