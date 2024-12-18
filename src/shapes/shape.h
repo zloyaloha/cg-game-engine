@@ -40,6 +40,15 @@ class Shape {
         void setShader(std::shared_ptr<QOpenGLShaderProgram> shader);
         void setMaterial(std::shared_ptr<Material> material);
 
+        void setScale(const glm::vec3& scale);
+        void setRotation(const glm::vec3& rotation);
+        void setPosition(const glm::vec3 &newPosition);
+
+        void updateModelMatrix();
+        glm::vec3 getScale() const;
+        glm::vec3 getRotation() const;
+        glm::vec3 getPosition() const;
+        
         void loadMatriciesToShader();
         void loadLightsToShader();
         void loadMaterialToShader();
@@ -57,5 +66,10 @@ class Shape {
         glm::mat4 _modelMatrix;
         glm::mat4 _projectionMatrix;
         glm::mat4 _viewMatrix;
+
+        glm::vec3 _scale;
+        glm::vec3 _rotation;
+        glm::vec3 _position;
+
         std::string type;
 };

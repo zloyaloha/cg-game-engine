@@ -111,11 +111,6 @@ void Cube::generateVertices()
     // vertexBuffer.release();
 }
 
-
-void Cube::setPosition(const glm::vec3& newPosition) {
-    position = newPosition;
-}
-
 void Cube::draw()
 {
     if (!shaderProgram->bind()) {

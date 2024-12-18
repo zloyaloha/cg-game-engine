@@ -50,7 +50,9 @@ void MainWindow::addCubeButtonClicked()
     // material->specularColor = glm::vec3(0.628281f, 0.555802f, 0.366065f);  // Зеркальные отражения для золота
     // material->shininess = 51.2f;  // Средняя шершавость, для блеска золота
 
-
+    cube->setPosition(glm::vec3(0, 0, 0));
+    cube->setRotation(glm::vec3(0, 0, 0));
+    cube->setScale(glm::vec3(1, 1, 1));
     cube->setMaterial(material);
     openglWidget->addShape(cube);
     
@@ -71,6 +73,9 @@ void MainWindow::addMeshButtonClicked()
         std::vector<std::shared_ptr<Mesh>> meshes = loader.load(filePath.toStdString());
         for (const auto mesh: meshes) {
             openglWidget->addShape(mesh);
+            mesh->setPosition(glm::vec3(0, 0, 0));
+            mesh->setRotation(glm::vec3(0, 0, 0));
+            mesh->setScale(glm::vec3(1, 1, 1));
         }
         qDebug() << "Add" << meshes.size() << "meshes!";
     }
