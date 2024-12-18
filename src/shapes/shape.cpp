@@ -65,6 +65,47 @@ glm::vec3 Shape::getPosition() const
 {
     return _position;
 }
+
+void Shape::setAmbientColor(const glm::vec3 &color)
+{
+    this->material->ambientColor = color;
+}
+
+void Shape::setDiffuseColor(const glm::vec3 &color)
+{
+    this->material->diffuseColor = color;
+}
+
+void Shape::setSpecularColor(const glm::vec3 &color)
+{
+    this->material->specularColor = color;
+}
+
+void Shape::setShininess(const float value)
+{
+    this->material->shininess = value;
+}
+
+glm::vec3 Shape::getAmbientColor()
+{
+    return this->material->ambientColor;
+}
+
+glm::vec3 Shape::getDiffuseColor()
+{
+    return glm::vec3(this->material->diffuseColor);
+}
+
+glm::vec3 Shape::getSpecularColor()
+{
+    return glm::vec3(this->material->specularColor);
+}
+
+float Shape::getShininess()
+{
+    return this->material->shininess;
+}
+
 void Shape::loadMatriciesToShader()
 {
     glm::vec3 cameraPosition = glm::vec3(glm::inverse(_viewMatrix)[3]);
@@ -127,15 +168,6 @@ void Shape::setLights(const std::vector<std::shared_ptr<Light>> &shapeLights)
 std::string Shape::getType() const
 {
     return type;
-}
-
-glm::vec3 Shape::getPosition() const
-{
-    return position;
-}
-
-void Shape::setPosition(const glm::vec3& newPosition) {
-    position = newPosition;
 }
 
 

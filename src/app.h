@@ -10,6 +10,8 @@
 #include <QStandardItemModel>
 #include <QStringListModel>
 #include <QVariant>
+#include <QFormLayout>
+#include <QGroupBox>
 
 
 QT_BEGIN_NAMESPACE

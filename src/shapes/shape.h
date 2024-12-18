@@ -49,15 +49,22 @@ class Shape {
         glm::vec3 getRotation() const;
         glm::vec3 getPosition() const;
         
+        void setAmbientColor(const glm::vec3& color);
+        void setDiffuseColor(const glm::vec3& color);
+        void setSpecularColor(const glm::vec3& color);
+        void setShininess(const float value);
+
+        glm::vec3 getAmbientColor();
+        glm::vec3 getDiffuseColor();
+        glm::vec3 getSpecularColor(); 
+        float getShininess();
+
         void loadMatriciesToShader();
         void loadLightsToShader();
         void loadMaterialToShader();
 
         void setLights(const std::vector<std::shared_ptr<Light>>& light);
         std::string getType() const;
-        glm::vec3 getPosition() const;
-        glm::vec3 getColor() const;
-        void setPosition(const glm::vec3 &newPosition);
         
     protected:
         std::vector<std::shared_ptr<Light>> lights;
