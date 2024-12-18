@@ -22,7 +22,38 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 void MainWindow::addCubeButtonClicked() 
 {   
-    openglWidget->addShape(std::make_shared<Cube>(1.0f, glm::vec3(0.0f, 0.0f, 1.0f + i), glm::vec3(1.0, 0, 0.5)));
+    std::shared_ptr<Cube> cube = std::make_shared<Cube>(1.0f, glm::vec3(0.0f, 0.0f, 1.0f + i));
+
+    std::shared_ptr<Material> material = std::make_shared<Material>();
+    material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
+    material->diffuseColor = glm::vec3(0.6f, 0.6f, 0.6f);  // Тусклый диффузный цвет
+    material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Нет зеркальных отражений (матовый)
+    material->shininess = 10.0f;  // Шершавость поверхности, меньше — более матовая
+
+    // material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
+    // material->diffuseColor = glm::vec3(0.8f, 0.8f, 0.8f);  // Яркий диффузный цвет
+    // material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Полностью зеркальные отражения (металлический эффект)
+    // material->shininess = 1.0f;  // Высокая шершавость (показывает более четкие отражения)
+
+    // material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
+    // material->diffuseColor = glm::vec3(0.5f, 0.5f, 0.5f);  // Средний диффузный цвет
+    // material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Яркие зеркальные отражения
+    // material->shininess = 50.0f;  // Средняя шершавость (для пластика)
+
+    // material->ambientColor = glm::vec3(0.2f, 0.1f, 0.05f);  // Темный амбиентный цвет, под дерево
+    // material->diffuseColor = glm::vec3(0.6f, 0.3f, 0.1f);  // Теплый диффузный цвет (деревянный оттенок)
+    // material->specularColor = glm::vec3(0.2f, 0.1f, 0.05f);  // Слабые зеркальные отражения
+    // material->shininess = 30.0f;  // Меньше шершавости, типично для деревянных поверхностей
+
+    // material->ambientColor = glm::vec3(0.24725f, 0.1995f, 0.0745f);  // Тусклый амбиентный цвет, похожий на золото
+    // material->diffuseColor = glm::vec3(0.75164f, 0.60648f, 0.22648f);  // Диффузный цвет золота
+    // material->specularColor = glm::vec3(0.628281f, 0.555802f, 0.366065f);  // Зеркальные отражения для золота
+    // material->shininess = 51.2f;  // Средняя шершавость, для блеска золота
+
+
+    cube->setMaterial(material);
+    openglWidget->addShape(cube);
+    
     i += 1;
 }
 
@@ -47,11 +78,22 @@ void MainWindow::addMeshButtonClicked()
 
 void MainWindow::addLightButtonClicked() 
 {
-    std::shared_ptr<Light> light = std::make_shared<Light>();
-    light->color = glm::vec3(1.0, 1.0, 1.0);
-    light->position = glm::vec3(10.0, 10.0, 10.0 + i);
-    light->pointTo = glm::vec3(0.0, 0.0, 0.0);
-    openglWidget->addLight(light);
+    qDebug() << "Add light!";
+    std::shared_ptr<Light> pointLight = std::make_shared<PointLight>(
+        glm::vec3(-10.0f, -10.0f, -10.0f)     // Позиция источника света
+    );
+
+    std::shared_ptr<Light> spotLight = std::make_shared<SpotLight>(
+        glm::vec3(2.0f, 3.0f, 5.0f),       // Позиция прожектора
+        glm::vec3(0.0f, 0.0f, 0.0f)      // Направление прожектора
+    );
+
+    std::shared_ptr<Light> dirLight = std::make_shared<DirectionalLight>(
+        glm::vec3(0.0f, 0.0f, 0.0f)      // Направление света (например, вниз)
+    );
+    openglWidget->addLight(pointLight);
+    // openglWidget->addLight(spotLight);
+    // openglWidget->addLight(dirLight);
 }
 
 MainWindow::~MainWindow() 
