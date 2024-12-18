@@ -70,36 +70,61 @@ vec3 pointLightLighting(PointLight light, vec3 fragPos, vec3 norm, vec3 texColor
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);  // Угол между отраженным светом и направлением камеры
     vec3 specular = spec * material.specularColor * light.lightColor * light.intensity;
 
-    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+    float attenuation = 1.0 / (light.constant * distance * (distance * distance));
 
     return (ambient + diffuse + specular) * attenuation;
 }
 
 // Прожекторное освещение
-vec3 spotLightLighting(SpotLight light, vec3 fragPos, vec3 norm, vec3 texColor) {
+vec3 spotLightLighting(SpotLight light, vec3 fragPos, vec3 norm, vec3 texColor, Material material, vec3 viewPos) {
+    // Вектор от источника света к точке
     vec3 lightVec = fragPos - light.lightPos;
     float distance = length(lightVec);
     lightVec = normalize(lightVec);
-    
+
+    // Расчет диффузной составляющей
     float diff = max(dot(norm, lightVec), 0.0);
     vec3 diffuse = diff * texColor * material.diffuseColor * light.lightColor * light.intensity;
 
-    float theta = dot(lightVec, normalize(-light.lightDir));
+    // Расчет фоновой (ambient) составляющей
+    vec3 ambient = material.ambientColor * light.lightColor * 0.1;
+
+    // Расчет зеркальной (specular) составляющей
+    vec3 viewDir = normalize(viewPos - fragPos);  // Направление к камере
+    vec3 reflectDir = reflect(-lightVec, norm);  // Отражение света от нормали
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    vec3 specular = spec * material.specularColor * light.lightColor * light.intensity;
+
+    // Расчет светового пучка (Spotlight factor)
+    float theta = dot(lightVec, normalize(-light.lightDir)); // Угол между направлением света и световым пучком
     float epsilon = light.cutOff - light.outerCutOff;
     float intensityFactor = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
-    
-    float attenuation = 1.0 / (1.0 + distance * distance);
 
-    return diffuse * intensityFactor * attenuation;
+    // Расчет затухания
+    // float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
+    // Суммирование всех составляющих с учетом светового пучка и затухания
+    vec3 result = (ambient + diffuse + specular) * intensityFactor;
+    return result;
 }
 
-vec3 directionalLightLighting(DirectionalLight light, vec3 fragPos, vec3 norm, vec3 texColor) {
+vec3 directionalLightLighting(DirectionalLight light, vec3 fragPos, vec3 norm, vec3 texColor, Material material, vec3 viewPos) {
+    // Направление света (нормализованное)
     vec3 lightVec = normalize(-light.lightDir);
 
     float diff = max(dot(norm, lightVec), 0.0);
     vec3 diffuse = diff * texColor * material.diffuseColor * light.lightColor * light.intensity;
 
-    return diffuse;
+    // Расчет фоновой (ambient) составляющей
+    vec3 ambient = material.ambientColor * light.lightColor * 0.1;
+
+    // Расчет отраженного света для зеркальной составляющей (specular)
+    vec3 viewDir = normalize(viewPos - fragPos);  // Направление к камере
+    vec3 reflectDir = reflect(-lightVec, norm);  // Отражение света от нормали
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    vec3 specular = spec * material.specularColor * light.lightColor * light.intensity;
+
+    return ambient + diffuse + specular;
 }
 
 void main() {
@@ -114,13 +139,13 @@ void main() {
         resultColor += pointLightLighting(pointLights[i], FragPos, norm, texColor, material, viewPos);
     }
 
-    // for (int i = 0; i < numSpotLights; ++i) {
-    //     resultColor += spotLightLighting(spotLights[i], FragPos, norm, texColor);
-    // }
+    for (int i = 0; i < numSpotLights; ++i) {
+        resultColor += spotLightLighting(spotLights[i], FragPos, norm, texColor, material, viewPos);
+    }
 
-    // for (int i = 0; i < numDirLights; ++i) {
-    //     resultColor += directionalLightLighting(dirLights[i], FragPos, norm, texColor);
-    // }
+    for (int i = 0; i < numDirLights; ++i) {
+        resultColor += directionalLightLighting(dirLights[i], FragPos, norm, texColor, material, viewPos);
+    }
 
     // resultColor = min(resultColor, vec3(1.0));
 

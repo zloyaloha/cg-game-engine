@@ -84,14 +84,14 @@ void MainWindow::addLightButtonClicked()
     );
 
     std::shared_ptr<Light> spotLight = std::make_shared<SpotLight>(
-        glm::vec3(2.0f, 3.0f, 5.0f),       // Позиция прожектора
-        glm::vec3(0.0f, 0.0f, 0.0f)      // Направление прожектора
+        glm::vec3(5.0f, 5.0f, 5.0f),       // Позиция прожектора
+        glm::vec3(1.0f, 1.0f, 1.0f)      // Направление прожектора
     );
 
     std::shared_ptr<Light> dirLight = std::make_shared<DirectionalLight>(
-        glm::vec3(0.0f, 0.0f, 0.0f)      // Направление света (например, вниз)
+        glm::vec3(0.0f, -1.0f, 0.0f)      // Направление света (например, вниз)
     );
-    openglWidget->addLight(pointLight);
+    openglWidget->addLight(spotLight);
     // openglWidget->addLight(spotLight);
     // openglWidget->addLight(dirLight);
 }

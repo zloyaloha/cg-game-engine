@@ -51,7 +51,7 @@ class DirectionalLight : public Light {
     public:
         glm::vec3 direction;
 
-        DirectionalLight(glm::vec3 direction, glm::vec3 color = glm::vec3(1.0f), float intensity = 10.0f)
+        DirectionalLight(glm::vec3 direction, glm::vec3 color = glm::vec3(1.0f), float intensity = 5.0f)
         : Light(DIRECTIONAL, color, intensity), direction(direction) {}
 
         void loadLightToShader(std::shared_ptr<QOpenGLShaderProgram> shader, int index) const override;
