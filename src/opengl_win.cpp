@@ -56,8 +56,12 @@ int OpenGLWidget::getFPS()
     return FPS;
 }
 
-void OpenGLWidget::createShaders()
+void OpenGLWidget::changeCameraProjection()
 {
+    camera.changeProjection();
+}
+
+void OpenGLWidget::createShaders() {
     shaders["cube"] = std::make_shared<QOpenGLShaderProgram>();
     shaders["cube"]->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/cubeVertexShader.glsl");
     shaders["cube"]->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/cubeFragmentShader.glsl");
