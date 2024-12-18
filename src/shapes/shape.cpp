@@ -19,12 +19,57 @@ void Shape::setMaterial(std::shared_ptr<Material> shapeMaterial)
     material = shapeMaterial;
 }
 
+void Shape::setScale(const glm::vec3& scale)
+{
+    _scale = scale;
+    updateModelMatrix();
+}
+
+void Shape::setRotation(const glm::vec3& rotation)
+{
+    _rotation = rotation;
+    updateModelMatrix();
+}
+
+void Shape::setPosition(const glm::vec3 &newPosition)
+{
+    _position = newPosition;
+    updateModelMatrix();
+}
+
+void Shape::updateModelMatrix() {
+    glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), _position);
+
+    glm::mat4 rotationX = glm::rotate(glm::mat4(1.0f), glm::radians(_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    glm::mat4 rotationY = glm::rotate(glm::mat4(1.0f), glm::radians(_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 rotationZ = glm::rotate(glm::mat4(1.0f), glm::radians(_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), _scale);
+
+    glm::mat4 modelMatrix = translationMatrix * rotationZ * rotationY * rotationX * scaleMatrix;
+
+    _modelMatrix = modelMatrix;
+}
+
+glm::vec3 Shape::getScale() const
+{
+    return _scale;
+}
+
+glm::vec3 Shape::getRotation() const
+{
+    return _rotation;
+}
+
+glm::vec3 Shape::getPosition() const
+{
+    return _position;
+}
 void Shape::loadMatriciesToShader()
 {
-    glm::mat4 modelMatrix = glm::translate(glm::mat4(1.0f), position);
     glm::vec3 cameraPosition = glm::vec3(glm::inverse(_viewMatrix)[3]);
     shaderProgram->setUniformValue("viewPos", QVector3D(cameraPosition.x, cameraPosition.y, cameraPosition.z));
-    shaderProgram->setUniformValue("model", QMatrix4x4(glm::value_ptr(modelMatrix)).transposed());
+    shaderProgram->setUniformValue("model", QMatrix4x4(glm::value_ptr(_modelMatrix)).transposed());
     shaderProgram->setUniformValue("view", QMatrix4x4(glm::value_ptr(_viewMatrix)).transposed());
     shaderProgram->setUniformValue("projection", QMatrix4x4(glm::value_ptr(_projectionMatrix)).transposed());
 }
