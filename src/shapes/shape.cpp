@@ -64,7 +64,6 @@ void Shape::loadLightsToShader()
             lights[i]->loadLightToShader(shaderProgram, dirLightIndex++);
         }
     }
-    std::cout << "added" << pointLightIndex << spotLightIndex << dirLightIndex << std::endl;
 }
 
 void Shape::loadMaterialToShader()
