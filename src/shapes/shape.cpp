@@ -31,19 +31,40 @@ void Shape::loadMatriciesToShader()
 
 void Shape::loadLightsToShader()
 {
-    shaderProgram->setUniformValue("numLights", int(lights.size()));
-    std::string arrPos;
+    int numPointLights = 0;
+    int numSpotLights = 0;
+    int numDirLights = 0;
+
     for (int i = 0; i < lights.size(); ++i) {
-        arrPos = "lights[" + std::to_string(i) + "].lightPos";
-        shaderProgram->setUniformValue(arrPos.c_str(),
-                                        QVector3D(lights[i]->position.x, lights[i]->position.y, lights[i]->position.z));
-        arrPos = "lights[" + std::to_string(i) + "].lightColor";
-        shaderProgram->setUniformValue(arrPos.c_str(),
-                                        QVector3D(lights[i]->color.x, lights[i]->color.y, lights[i]->color.z));
-        arrPos = "lights[" + std::to_string(i) + "].lightPointTo";
-        shaderProgram->setUniformValue(arrPos.c_str(),
-                                        QVector3D(lights[i]->pointTo.x, lights[i]->pointTo.y, lights[i]->pointTo.z));
+        Light::LightType type = lights[i]->getType();
+        if (type == Light::POINT) {
+            ++numPointLights;
+        } else if (type == Light::SPOT) {
+            ++numSpotLights;
+        } else if (type == Light::DIRECTIONAL) {
+            ++numDirLights;
+        }
     }
+
+    shaderProgram->setUniformValue("numPointLights", numPointLights);
+    shaderProgram->setUniformValue("numSpotLights", numSpotLights);
+    shaderProgram->setUniformValue("numDirLights", numDirLights);
+
+    int pointLightIndex = 0;
+    int spotLightIndex = 0;
+    int dirLightIndex = 0;
+
+    for (int i = 0; i < lights.size(); ++i) {
+        Light::LightType type = lights[i]->getType();
+        if (type == Light::POINT) {
+            lights[i]->loadLightToShader(shaderProgram, pointLightIndex++);
+        } else if (type == Light::SPOT) {
+            lights[i]->loadLightToShader(shaderProgram, spotLightIndex++);
+        } else if (type == Light::DIRECTIONAL) {
+            lights[i]->loadLightToShader(shaderProgram, dirLightIndex++);
+        }
+    }
+    std::cout << "added" << pointLightIndex << spotLightIndex << dirLightIndex << std::endl;
 }
 
 void Shape::loadMaterialToShader()

@@ -79,11 +79,21 @@ void MainWindow::addMeshButtonClicked()
 void MainWindow::addLightButtonClicked() 
 {
     qDebug() << "Add light!";
-    std::shared_ptr<Light> light = std::make_shared<Light>();
-    light->color = glm::vec3(1.0, 1.0, 1.0);
-    light->position = glm::vec3(10.0, 10.0, 10.0 + i);
-    light->pointTo = glm::vec3(0.0, 0.0, 0.0);
-    openglWidget->addLight(light);
+    std::shared_ptr<Light> pointLight = std::make_shared<PointLight>(
+        glm::vec3(-10.0f, -10.0f, -10.0f)     // Позиция источника света
+    );
+
+    std::shared_ptr<Light> spotLight = std::make_shared<SpotLight>(
+        glm::vec3(2.0f, 3.0f, 5.0f),       // Позиция прожектора
+        glm::vec3(0.0f, 0.0f, 0.0f)      // Направление прожектора
+    );
+
+    std::shared_ptr<Light> dirLight = std::make_shared<DirectionalLight>(
+        glm::vec3(0.0f, 0.0f, 0.0f)      // Направление света (например, вниз)
+    );
+    openglWidget->addLight(pointLight);
+    // openglWidget->addLight(spotLight);
+    // openglWidget->addLight(dirLight);
 }
 
 MainWindow::~MainWindow() 

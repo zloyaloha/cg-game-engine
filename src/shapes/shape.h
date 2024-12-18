@@ -11,12 +11,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-struct Light {
-    glm::vec3 position;
-    glm::vec3 pointTo;
-    glm::vec3 color;
-};
+#include "light.h"
 
 struct Material {
     glm::vec3 ambientColor;
