@@ -15,6 +15,11 @@
 #include <memory>
 #include "camera.h"
 #include <QTimer>
+#include <QDialog>
+#include <QListWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <iostream>
 
 class OpenGLWidget : public QOpenGLWidget {
     Q_OBJECT
@@ -23,6 +28,7 @@ public:
     OpenGLWidget(QWidget *parent = nullptr);
     void addShape(std::shared_ptr<Shape> shape);
     void addLight(std::shared_ptr<Light> light);
+    std::vector<std::shared_ptr<Shape>> getAllShapes();
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;

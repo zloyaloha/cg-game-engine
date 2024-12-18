@@ -129,6 +129,16 @@ std::string Shape::getType() const
     return type;
 }
 
+glm::vec3 Shape::getPosition() const
+{
+    return position;
+}
+
+void Shape::setPosition(const glm::vec3& newPosition) {
+    position = newPosition;
+}
+
+
 void Shape::setModelMatrix(const glm::mat4 &modelMatrix) 
 {
     _modelMatrix = modelMatrix;

@@ -5,6 +5,12 @@
 #include "opengl_win.h"
 #include <memory>
 #include "obj_loader.h"
+#include <QLabel>
+#include <QLineEdit>
+#include <QStandardItemModel>
+#include <QStringListModel>
+#include <QVariant>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,6 +23,9 @@ class MainWindow : public QMainWindow {
 
 public:
     explicit MainWindow(QWidget* parent = nullptr);
+    void addItemToList(int i, const std::string& type);
+    void onObjectSelected(QListWidgetItem *item);
+    void showObjectSettings(std::shared_ptr<Shape> shape);
     ~MainWindow();
 public slots:
     void addLightButtonClicked();
@@ -25,5 +34,6 @@ public slots:
 private:
     int i{0};
     Ui::MainWindow* ui;
-    OpenGLWidget* openglWidget; // Ваш виджет
+    OpenGLWidget* openglWidget;
+    QStringListModel* listModel;
 };

@@ -55,6 +55,10 @@ class Shape {
 
         void setLights(const std::vector<std::shared_ptr<Light>>& light);
         std::string getType() const;
+        glm::vec3 getPosition() const;
+        glm::vec3 getColor() const;
+        void setPosition(const glm::vec3 &newPosition);
+        
     protected:
         std::vector<std::shared_ptr<Light>> lights;
         std::shared_ptr<Material> material;

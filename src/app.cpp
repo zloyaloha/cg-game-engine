@@ -7,20 +7,24 @@ namespace {
     const int HEIGT = 512;
 }
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) 
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     connect(ui->addCube, &QPushButton::clicked, this, &MainWindow::addCubeButtonClicked);
     connect(ui->addLight, &QPushButton::clicked, this, &MainWindow::addLightButtonClicked);
     connect(ui->addMesh, &QPushButton::clicked, this, &MainWindow::addMeshButtonClicked);
+    
     setWindowTitle("Игры Разума");
     setGeometry(400, 200, 1280, 720);
 
     openglWidget = new OpenGLWidget(ui->openGLWidget);
     openglWidget->resize(920, 512);
+
+    connect(ui->listWidget, &QListWidget::itemClicked, this, &MainWindow::onObjectSelected);
 }
 
 void MainWindow::addCubeButtonClicked() 
+<<<<<<< HEAD
 {   
     std::shared_ptr<Cube> cube = std::make_shared<Cube>(1.0f, glm::vec3(0.0f, 0.0f, 1.0f + i));
 
@@ -56,7 +60,17 @@ void MainWindow::addCubeButtonClicked()
     cube->setMaterial(material);
     openglWidget->addShape(cube);
     
+=======
+{    
+    addItemToList(i, "cube");
+    glm::vec3 position = glm::vec3(0.0f, 0.0f, 1.0f + i);
+    glm::vec3 color = glm::vec3(1.0, 0, 0.5);
+    openglWidget->addShape(std::make_shared<Cube>(1.0f, position, color));
+>>>>>>> 87205a6 (added objects settings in the list)
     i += 1;
+
+    
+
 }
 
 void MainWindow::addMeshButtonClicked()
@@ -73,12 +87,17 @@ void MainWindow::addMeshButtonClicked()
         std::vector<std::shared_ptr<Mesh>> meshes = loader.load(filePath.toStdString());
         for (const auto mesh: meshes) {
             openglWidget->addShape(mesh);
+<<<<<<< HEAD
             mesh->setPosition(glm::vec3(0, 0, 0));
             mesh->setRotation(glm::vec3(0, 0, 0));
             mesh->setScale(glm::vec3(1, 1, 1));
+=======
+            addItemToList(i, "mesh");
+>>>>>>> 87205a6 (added objects settings in the list)
         }
         qDebug() << "Add" << meshes.size() << "meshes!";
     }
+    
 }
 
 void MainWindow::addLightButtonClicked() 
@@ -100,6 +119,86 @@ void MainWindow::addLightButtonClicked()
     // openglWidget->addLight(spotLight);
     // openglWidget->addLight(dirLight);
 }
+
+void MainWindow::addItemToList(int i, const std::string& type)
+{
+    // Создаем новый элемент списка
+    QListWidgetItem* newItem = new QListWidgetItem(QString::fromStdString(type), ui->listWidget);
+    
+    // Привязываем числовое значение к элементу
+    newItem->setData(Qt::UserRole, i);  // Qt::UserRole можно использовать для хранения целых значений
+
+    // Можно также привязать тип (строку) как дополнительные данные
+    newItem->setData(Qt::UserRole + 1, QString::fromStdString(type));
+
+    // Добавляем элемент в список
+    ui->listWidget->addItem(newItem);
+}
+
+void MainWindow::onObjectSelected(QListWidgetItem *item)
+{
+    // Извлекаем числовое значение (например, ID)
+    int id = item->data(Qt::UserRole).toInt();
+
+    // Извлекаем строку с типом
+    QString type = item->data(Qt::UserRole + 1).toString();
+
+    // Выводим данные для проверки
+    qDebug() << "Selected Item ID: " << id;
+    qDebug() << "Item Type: " << type;
+
+    // Например, если у вас есть указатель на объект Shape, привязанный к этим данным
+    // Получаем объект Shape, например, из списка или другой структуры данных
+    std::shared_ptr<Shape> selectedShape;
+    selectedShape = openglWidget->getAllShapes()[id];
+    if (selectedShape) {
+        showObjectSettings(selectedShape);
+    }
+}
+
+
+void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
+{
+    QDialog settingsDialog;
+    settingsDialog.setWindowTitle("Настройки объекта");
+    settingsDialog.setMinimumSize(300, 200);
+
+    // // Поля для редактирования позиции
+    QLabel *positionLabel = new QLabel("Позиция (x, y, z):", &settingsDialog);
+    glm::vec3 position =  shape->getPosition();
+    glm::vec3 color = shape->getColor();    
+    QLineEdit *positionX = new QLineEdit(QString::number(position.x), &settingsDialog);
+    QLineEdit *positionY = new QLineEdit(QString::number(position.y), &settingsDialog);
+    QLineEdit *positionZ = new QLineEdit(QString::number(position.z), &settingsDialog);
+    // if (shape->getType() == "cube") {
+    //     shape->setPosition(glm::vec3(positionX->text().toFloat(), positionY->text().toFloat(), positionZ->text().toFloat()));
+    // }
+
+    // Кнопка сохранения
+    QPushButton *saveButton = new QPushButton("Сохранить", &settingsDialog);
+    connect(saveButton, &QPushButton::clicked, [&]() {
+        // Применяем изменения
+        shape->setPosition(glm::vec3(positionX->text().toFloat(), positionY->text().toFloat(), positionZ->text().toFloat()));
+        // dynamic_cast<Cube*>(shape)->setSize(scaleInput->text().toFloat());
+
+        // Закрываем окно
+        settingsDialog.accept();
+    });
+
+    // // Компоновка
+    QVBoxLayout *layout = new QVBoxLayout();
+    layout->addWidget(positionLabel);
+    layout->addWidget(positionX);
+    layout->addWidget(positionY);
+    layout->addWidget(positionZ);
+    // layout->addWidget(scaleLabel);
+    // layout->addWidget(scaleInput);
+    // layout->addWidget(saveButton);
+
+    settingsDialog.setLayout(layout);
+    settingsDialog.exec();
+}
+
 
 MainWindow::~MainWindow() 
 {

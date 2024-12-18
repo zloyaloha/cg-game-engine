@@ -73,7 +73,7 @@
          <attribute name="title">
           <string>Tab 1</string>
          </attribute>
-         <widget class="QListView" name="listView">
+         <widget class="QListWidget" name="listWidget">
           <property name="geometry">
            <rect>
             <x>-5</x>

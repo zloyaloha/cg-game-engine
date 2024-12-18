@@ -27,9 +27,14 @@ void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
 }
 
 void OpenGLWidget::addLight(std::shared_ptr<Light> light)
-{
+{   
     lights.push_back(light);
     setLigths();
+}
+
+std::vector<std::shared_ptr<Shape>> OpenGLWidget::getAllShapes()
+{
+    return shapes;
 }
 
 void OpenGLWidget::createShaders() {
@@ -84,6 +89,7 @@ void OpenGLWidget::paintGL()
 }
 
 void OpenGLWidget::keyPressEvent(QKeyEvent *event) {
+    
     keys[event->key()] = true;
 }
 
