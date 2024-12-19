@@ -1,5 +1,6 @@
 #include "opengl_win.h"
 #include <iostream>
+#include <QFont>
 
 OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent),
     camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
@@ -14,6 +15,10 @@ OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent),
     format.setVersion(4, 2);
     format.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(format);
+
+    fpsUpdateTimer = new QTimer(this);
+    connect(fpsUpdateTimer, &QTimer::timeout, this, &OpenGLWidget::updateFPS);
+    fpsUpdateTimer->start(1000);  // Обновление FPS каждую секунду
 }
 
 void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
@@ -23,7 +28,6 @@ void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
     shape->setProjectionMatrix(camera.getProjectionMatrix(aspectRatio));
     shape->setViewMatrix(camera.getViewMatrix());
     shape->initialize();
-
     shapes.push_back(shape);
     setLigths();
     update();
@@ -36,7 +40,24 @@ void OpenGLWidget::addLight(std::shared_ptr<Light> light)
     setLigths();
 }
 
-void OpenGLWidget::createShaders() {
+void OpenGLWidget::updateFPS()
+{
+    float currentTime = static_cast<float>(QTime::currentTime().msec());
+    deltaTime = currentTime - lastTime;
+    lastTime = currentTime;
+    if (deltaTime > 0.0f) {
+        FPS = frameCount;
+        frameCount = 0;
+    }
+}
+
+int OpenGLWidget::getFPS()
+{
+    return FPS;
+}
+
+void OpenGLWidget::createShaders()
+{
     shaders["cube"] = std::make_shared<QOpenGLShaderProgram>();
     shaders["cube"]->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/cubeVertexShader.glsl");
     shaders["cube"]->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/cubeFragmentShader.glsl");
@@ -95,9 +116,9 @@ void OpenGLWidget::paintGL()
     for (auto shape: shapes) {
         shape->setViewMatrix(camera.getViewMatrix());
         shape->setProjectionMatrix(camera.getProjectionMatrix((float)width() / (float)height()));
-        shape->initialize();
         shape->draw();
     }
+    ++frameCount;
 }
 
 void OpenGLWidget::keyPressEvent(QKeyEvent *event) {

@@ -6,6 +6,7 @@
 #include <QOpenGLFunctions_4_3_Core>
 #include <QOpenGLShaderProgram>
 #include <QTimer>
+#include <QTime>
 #include <QMatrix4x4>
 #include <QOpenGLContext>
 #include <QOpenGLBuffer>
@@ -23,6 +24,7 @@ public:
     OpenGLWidget(QWidget *parent = nullptr);
     void addShape(std::shared_ptr<Shape> shape);
     void addLight(std::shared_ptr<Light> light);
+    int getFPS();
 protected:
     void createVaos();
     void createShaders();
@@ -31,6 +33,8 @@ protected:
     void resizeGL(int w, int h) override;
     void paintGL() override;
 
+    void updateFPS();
+
     void setTimer();
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
@@ -38,9 +42,11 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
 private:
     Camera camera;
+    int frameCount{0};
     bool keys[256];
     Cube *cube;
     QTimer* timer;
+    QTimer* fpsUpdateTimer;
     glm::mat4 projectionMatrix;
     glm::mat4 viewMatrix;
     QOpenGLContext* m_context;
@@ -48,6 +54,9 @@ private:
     float rotationAngle;
     float aspectRatio;
     float lastX{0}, lastY{0};
+    float deltaTime;
+    float lastTime;
+    int FPS;
 
     std::vector<std::shared_ptr<Light>> lights;
     std::vector<std::shared_ptr<Shape>> shapes;

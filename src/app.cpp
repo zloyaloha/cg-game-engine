@@ -18,6 +18,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     openglWidget = new OpenGLWidget(ui->openGLWidget);
     openglWidget->resize(920, 512);
+
+    fpsUpdateTimer = std::make_shared<QTimer>(this);
+    connect(fpsUpdateTimer.get(), &QTimer::timeout, this, &MainWindow::displayFPS);
+    fpsUpdateTimer->start(1000);  // Обновление FPS каждую секунду
 }
 
 void MainWindow::addCubeButtonClicked() 
@@ -57,6 +61,11 @@ void MainWindow::addCubeButtonClicked()
     openglWidget->addShape(cube);
     
     i += 1;
+}
+
+void MainWindow::displayFPS()
+{
+    ui->fps->display(openglWidget->getFPS());
 }
 
 void MainWindow::addMeshButtonClicked()

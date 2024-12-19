@@ -23,6 +23,9 @@ public slots:
     void addCubeButtonClicked();
     void addMeshButtonClicked();
 private:
+    void displayFPS();
+
+    std::shared_ptr<QTimer> fpsUpdateTimer;
     int i{0};
     Ui::MainWindow* ui;
     OpenGLWidget* openglWidget; // Ваш виджет
