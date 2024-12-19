@@ -2,7 +2,7 @@
 #include "iostream"
 
 Shape::Shape(const glm::vec3& shapePosition, const std::string& shapeType) : 
-    vertexBuffer(QOpenGLBuffer::VertexBuffer), position(shapePosition), type(shapeType) {}
+    position(shapePosition), type(shapeType) {}
 
 void Shape::setViewMatrix(const glm::mat4 &viewMatrix) 
 {
@@ -12,6 +12,11 @@ void Shape::setViewMatrix(const glm::mat4 &viewMatrix)
 void Shape::setShader(std::shared_ptr<QOpenGLShaderProgram> shader)
 {
     shaderProgram = shader;
+}
+
+void Shape::setVao(std::shared_ptr<QOpenGLVertexArrayObject> vao)
+{
+    _vao = vao;
 }
 
 void Shape::setMaterial(std::shared_ptr<Material> shapeMaterial)

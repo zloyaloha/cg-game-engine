@@ -22,20 +22,13 @@ public:
     void loadTextureToShader();
 
 private:
-    std::vector<glm::vec3> vertices;
-    std::vector<glm::vec3> normals;
     std::vector<glm::vec2> texCoords;
     std::vector<Texture> textures;
-    std::vector<unsigned int> indices;
 
     QOpenGLBuffer vertexBuffer{QOpenGLBuffer::VertexBuffer};
     QOpenGLBuffer normalBuffer{QOpenGLBuffer::VertexBuffer};
     QOpenGLBuffer textureBuffer{QOpenGLBuffer::VertexBuffer};
     QOpenGLBuffer indexBuffer{QOpenGLBuffer::IndexBuffer};
 
-    GLuint pos;
-    GLuint normal;
     GLuint tex;
-
-    QOpenGLVertexArrayObject vao;
 };

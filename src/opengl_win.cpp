@@ -18,12 +18,16 @@ OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent),
 
 void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
 {
+    shape->setShader(shaders[shape->getType()]);
+    shape->setVao(vaos[shape->getType()]);
     shape->setProjectionMatrix(camera.getProjectionMatrix(aspectRatio));
     shape->setViewMatrix(camera.getViewMatrix());
-    shape->setShader(shaders[shape->getType()]);
+    shape->initialize();
+
     shapes.push_back(shape);
     setLigths();
     update();
+    shaders[shape->getType()]->release();
 }
 
 void OpenGLWidget::addLight(std::shared_ptr<Light> light)
@@ -48,6 +52,18 @@ void OpenGLWidget::createShaders() {
     }
 }
 
+void OpenGLWidget::createVaos()
+{
+    vaos["cube"] = std::make_shared<QOpenGLVertexArrayObject>();
+    vaos["mesh"] = std::make_shared<QOpenGLVertexArrayObject>();
+    for (auto& [type, vao]: vaos) {
+        if (!vao->create()) {
+            qDebug() << "Vao creating failed: ";
+        }
+        vao->bind();
+    }
+}
+
 void OpenGLWidget::setTimer() {
     timer = new QTimer(this);
     timer->setInterval(32);  // Интервал 16 мс (примерно 60 кадров в секунду)
@@ -58,6 +74,7 @@ void OpenGLWidget::setTimer() {
 
 void OpenGLWidget::initializeGL() {
     createShaders();
+    createVaos();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     f->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     f->glEnable(GL_DEPTH_TEST);
