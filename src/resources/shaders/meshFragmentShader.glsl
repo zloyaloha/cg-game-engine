@@ -147,9 +147,5 @@ void main() {
         resultColor += directionalLightLighting(dirLights[i], FragPos, norm, texColor, material, viewPos);
     }
 
-    // resultColor = min(resultColor, vec3(1.0));
-
-    // Выводим итоговый цвет с учетом текстуры и освещения
     FragColor = vec4(resultColor, 1.0);
-    // FragColor = vec4(vec3(0), 1.0);
 }
