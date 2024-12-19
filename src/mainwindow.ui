@@ -124,6 +124,13 @@
         </item>
        </layout>
       </item>
+      <item>
+       <widget class="QPushButton" name="changeProjection">
+        <property name="text">
+         <string>Поменять проекцию</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>

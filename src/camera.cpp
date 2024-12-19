@@ -39,6 +39,11 @@ void Camera::processMouseMovement(float xOffset, float yOffset, bool constrainPi
     Front = glm::normalize(front);
 }
 
+void Camera::changeProjection()
+{
+    IsPerspective = !(IsPerspective);
+}
+
 void Camera::processMouseScroll(float yOffset) {
     FOV -= yOffset;
     
@@ -55,5 +60,10 @@ glm::mat4 Camera::getViewMatrix() {
 }
 
 glm::mat4 Camera::getProjectionMatrix(float aspectRatio) {
-    return glm::perspective(glm::radians(FOV), aspectRatio, Near, Far);
+    if (IsPerspective) {
+        return glm::perspective(glm::radians(FOV), aspectRatio, Near, Far);
+    } else {
+        float orthoSize = 1.0f; // Размер для ортографической проекции, можно настроить по необходимости
+        return glm::ortho(-orthoSize * aspectRatio, orthoSize * aspectRatio, -orthoSize, orthoSize, Near, Far);
+    }
 }

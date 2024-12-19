@@ -10,7 +10,7 @@ public:
 
     void processKeyboard(int key, float deltaTime);
     void processMouseMovement(float xOffset, float yOffset, bool constrainPitch = true);
-
+    void changeProjection();
     glm::mat4 getViewMatrix();
     glm::mat4 getProjectionMatrix(float aspectRatio);
 
@@ -18,7 +18,7 @@ public:
     void setFront(glm::vec3 front) { Front = front; }
     void setUp(glm::vec3 up) { Up = up; }
     void processMouseScroll(float yOffset);
-
+    
     glm::vec3 Position;
     glm::vec3 Front;
     glm::vec3 Up;
@@ -30,4 +30,5 @@ private:
     float Sensitivity;
     float Yaw = -90.0f;
     float Pitch = 0.0f;
+    bool IsPerspective{1};
 };

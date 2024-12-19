@@ -22,6 +22,7 @@ public slots:
     void addLightButtonClicked();
     void addCubeButtonClicked();
     void addMeshButtonClicked();
+    void changeProjectionButtonClicked();
 private:
     void displayFPS();
 

@@ -25,6 +25,7 @@ public:
     void addShape(std::shared_ptr<Shape> shape);
     void addLight(std::shared_ptr<Light> light);
     int getFPS();
+    void changeCameraProjection();
 protected:
     void createVaos();
     void createShaders();

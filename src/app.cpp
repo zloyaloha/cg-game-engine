@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->addCube, &QPushButton::clicked, this, &MainWindow::addCubeButtonClicked);
     connect(ui->addLight, &QPushButton::clicked, this, &MainWindow::addLightButtonClicked);
     connect(ui->addMesh, &QPushButton::clicked, this, &MainWindow::addMeshButtonClicked);
+    connect(ui->changeProjection, &QPushButton::clicked, this, &MainWindow::changeProjectionButtonClicked);
     setWindowTitle("Игры Разума");
     setGeometry(400, 200, 1280, 720);
 
@@ -90,11 +91,16 @@ void MainWindow::addMeshButtonClicked()
     }
 }
 
+void MainWindow::changeProjectionButtonClicked()
+{
+    openglWidget->changeCameraProjection();
+}
+
 void MainWindow::addLightButtonClicked() 
 {
     qDebug() << "Add light!";
     std::shared_ptr<Light> pointLight = std::make_shared<PointLight>(
-        glm::vec3(-10.0f, -10.0f, -10.0f)     // Позиция источника света
+        glm::vec3(-3.0f, -3.0f, -3.0f)     // Позиция источника света
     );
 
     std::shared_ptr<Light> spotLight = std::make_shared<SpotLight>(
@@ -105,9 +111,10 @@ void MainWindow::addLightButtonClicked()
     std::shared_ptr<Light> dirLight = std::make_shared<DirectionalLight>(
         glm::vec3(-1.0f, -1.0f, -1.0f)      // Направление света (например, вниз)
     );
+    openglWidget->addLight(pointLight);
     // openglWidget->addLight(spotLight);
     // openglWidget->addLight(spotLight);
-    openglWidget->addLight(spotLight);
+    // openglWidget->addLight(spotLight);
 }
 
 MainWindow::~MainWindow() 
