@@ -24,11 +24,13 @@ public:
     void addShape(std::shared_ptr<Shape> shape);
     void addLight(std::shared_ptr<Light> light);
 protected:
+    void createVaos();
+    void createShaders();
+
     void initializeGL() override;
     void resizeGL(int w, int h) override;
     void paintGL() override;
 
-    void createShaders();
     void setTimer();
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
@@ -50,6 +52,7 @@ private:
     std::vector<std::shared_ptr<Light>> lights;
     std::vector<std::shared_ptr<Shape>> shapes;
     std::unordered_map<std::string, std::shared_ptr<QOpenGLShaderProgram>> shaders;
+    std::unordered_map<std::string, std::shared_ptr<QOpenGLVertexArrayObject>> vaos;
 private:
     void updateCamera();
     void setLigths();

@@ -38,6 +38,7 @@ class Shape {
         void setProjectionMatrix(const glm::mat4& projectionMatrix);
         void setViewMatrix(const glm::mat4& viewMatrix);
         void setShader(std::shared_ptr<QOpenGLShaderProgram> shader);
+        void setVao(std::shared_ptr<QOpenGLVertexArrayObject> vao);
         void setMaterial(std::shared_ptr<Material> material);
 
         void setScale(const glm::vec3& scale);
@@ -61,8 +62,7 @@ class Shape {
 
         glm::vec3 position;
         std::shared_ptr<QOpenGLShaderProgram> shaderProgram;
-        QOpenGLBuffer vertexBuffer;
-        QOpenGLVertexArrayObject vao;
+        std::shared_ptr<QOpenGLVertexArrayObject> _vao;
         glm::mat4 _modelMatrix;
         glm::mat4 _projectionMatrix;
         glm::mat4 _viewMatrix;
@@ -72,4 +72,15 @@ class Shape {
         glm::vec3 _position;
 
         std::string type;
+
+        QOpenGLBuffer vertexBuffer{QOpenGLBuffer::VertexBuffer};
+        QOpenGLBuffer normalBuffer{QOpenGLBuffer::VertexBuffer};
+        QOpenGLBuffer indexBuffer{QOpenGLBuffer::IndexBuffer};
+
+        GLuint pos;
+        GLuint normal;
+
+        std::vector<glm::vec3> vertices;
+        std::vector<glm::vec3> normals;
+        std::vector<unsigned int> indices;
 };
