@@ -45,7 +45,7 @@ std::vector<std::shared_ptr<Mesh>> ObjLoader::load(const std::string& filepath) 
             const aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
             parseMaterial(material, newMesh);
         }
-
+        newMesh->initAABB();
         meshes.push_back(newMesh);
     }
     return meshes;

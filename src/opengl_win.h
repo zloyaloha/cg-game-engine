@@ -16,6 +16,8 @@
 #include <memory>
 #include "camera.h"
 #include <QTimer>
+#include "physics.h"
+#include <thread>
 
 class OpenGLWidget : public QOpenGLWidget {
     Q_OBJECT
@@ -25,7 +27,9 @@ public:
     void addShape(std::shared_ptr<Shape> shape);
     void addLight(std::shared_ptr<Light> light);
     int getFPS();
+    void startScene();
     void changeCameraProjection();
+    void restorePosition();
 protected:
     void createVaos();
     void createShaders();
@@ -58,11 +62,13 @@ private:
     float deltaTime;
     float lastTime;
     int FPS;
-
+    bool started{false};
+    Physics physic;
     std::vector<std::shared_ptr<Light>> lights;
     std::vector<std::shared_ptr<Shape>> shapes;
     std::unordered_map<std::string, std::shared_ptr<QOpenGLShaderProgram>> shaders;
     std::unordered_map<std::string, std::shared_ptr<QOpenGLVertexArrayObject>> vaos;
+    std::thread physicsThread;
 private:
     void updateCamera();
     void setLigths();

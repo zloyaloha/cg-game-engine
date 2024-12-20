@@ -25,10 +25,7 @@ private:
     std::vector<glm::vec2> texCoords;
     std::vector<Texture> textures;
 
-    QOpenGLBuffer vertexBuffer{QOpenGLBuffer::VertexBuffer};
-    QOpenGLBuffer normalBuffer{QOpenGLBuffer::VertexBuffer};
     QOpenGLBuffer textureBuffer{QOpenGLBuffer::VertexBuffer};
-    QOpenGLBuffer indexBuffer{QOpenGLBuffer::IndexBuffer};
 
     GLuint tex;
 };

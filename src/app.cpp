@@ -7,13 +7,15 @@ namespace {
     const int HEIGT = 512;
 }
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) 
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     connect(ui->addCube, &QPushButton::clicked, this, &MainWindow::addCubeButtonClicked);
     connect(ui->addLight, &QPushButton::clicked, this, &MainWindow::addLightButtonClicked);
     connect(ui->addMesh, &QPushButton::clicked, this, &MainWindow::addMeshButtonClicked);
     connect(ui->changeProjection, &QPushButton::clicked, this, &MainWindow::changeProjectionButtonClicked);
+    connect(ui->startScene, &QPushButton::clicked, this, &MainWindow::startScene);
+    connect(ui->restorePosition, &QPushButton::clicked, this, &MainWindow::restorePosition);
     setWindowTitle("Игры Разума");
     setGeometry(400, 200, 1280, 720);
 
@@ -25,42 +27,22 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     fpsUpdateTimer->start(1000);  // Обновление FPS каждую секунду
 }
 
-void MainWindow::addCubeButtonClicked() 
-{   
+void MainWindow::addCubeButtonClicked()
+{
     std::shared_ptr<Cube> cube = std::make_shared<Cube>(1.0f, glm::vec3(0.0f, 0.0f, 1.0f + i));
 
     std::shared_ptr<Material> material = std::make_shared<Material>();
-    material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
-    material->diffuseColor = glm::vec3(0.5f, 0.5f, 0.5f);  // Тусклый диффузный цвет
-    material->specularColor = glm::vec3(0.5f, 0.5f, 0.5f);  // Нет зеркальных отражений (матовый)
-    material->shininess = 10.0f;  // Шершавость поверхности, меньше — более матовая
-
-    // material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
-    // material->diffuseColor = glm::vec3(0.8f, 0.8f, 0.8f);  // Яркий диффузный цвет
-    // material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Полностью зеркальные отражения (металлический эффект)
-    // material->shininess = 1.0f;  // Высокая шершавость (показывает более четкие отражения)
-
-    // material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
-    // material->diffuseColor = glm::vec3(0.5f, 0.5f, 0.5f);  // Средний диффузный цвет
-    // material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Яркие зеркальные отражения
-    // material->shininess = 50.0f;  // Средняя шершавость (для пластика)
-
-    // material->ambientColor = glm::vec3(0.2f, 0.1f, 0.05f);  // Темный амбиентный цвет, под дерево
-    // material->diffuseColor = glm::vec3(0.6f, 0.3f, 0.1f);  // Теплый диффузный цвет (деревянный оттенок)
-    // material->specularColor = glm::vec3(0.2f, 0.1f, 0.05f);  // Слабые зеркальные отражения
-    // material->shininess = 30.0f;  // Меньше шершавости, типично для деревянных поверхностей
-
-    // material->ambientColor = glm::vec3(0.24725f, 0.1995f, 0.0745f);  // Тусклый амбиентный цвет, похожий на золото
-    // material->diffuseColor = glm::vec3(0.75164f, 0.60648f, 0.22648f);  // Диффузный цвет золота
-    // material->specularColor = glm::vec3(0.628281f, 0.555802f, 0.366065f);  // Зеркальные отражения для золота
-    // material->shininess = 51.2f;  // Средняя шершавость, для блеска золота
+    material->ambientColor = glm::vec3(1, 1, 1);
+    material->diffuseColor = glm::vec3(0.4f, 0.4f, 0.4f);
+    material->specularColor = glm::vec3(0.7f, 0.7f, 0.7f);
+    material->shininess = 10.0f;
 
     cube->setPosition(glm::vec3(0, 0, 0));
     cube->setRotation(glm::vec3(0, 0, 0));
     cube->setScale(glm::vec3(1, 1, 1));
     cube->setMaterial(material);
     openglWidget->addShape(cube);
-    
+
     i += 1;
 }
 
@@ -96,7 +78,17 @@ void MainWindow::changeProjectionButtonClicked()
     openglWidget->changeCameraProjection();
 }
 
-void MainWindow::addLightButtonClicked() 
+void MainWindow::startScene()
+{
+    openglWidget->startScene();
+}
+
+void MainWindow::restorePosition()
+{
+    openglWidget->restorePosition();
+}
+
+void MainWindow::addLightButtonClicked()
 {
     qDebug() << "Add light!";
     std::shared_ptr<Light> pointLight = std::make_shared<PointLight>(
@@ -117,7 +109,7 @@ void MainWindow::addLightButtonClicked()
     // openglWidget->addLight(spotLight);
 }
 
-MainWindow::~MainWindow() 
+MainWindow::~MainWindow()
 {
     delete ui;
 }

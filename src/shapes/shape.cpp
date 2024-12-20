@@ -1,10 +1,10 @@
 #include "shape.h"
 #include "iostream"
 
-Shape::Shape(const glm::vec3& shapePosition, const std::string& shapeType) : 
-    position(shapePosition), type(shapeType) {}
+Shape::Shape(const glm::vec3& shapePosition, const std::string& shapeType) :
+    _position(shapePosition), type(shapeType), _aabb(std::make_shared<AABB>()), history(std::make_shared<ShapeHistory>()) {}
 
-void Shape::setViewMatrix(const glm::mat4 &viewMatrix) 
+void Shape::setViewMatrix(const glm::mat4 &viewMatrix)
 {
     _viewMatrix = viewMatrix;
 }
@@ -27,19 +27,58 @@ void Shape::setMaterial(std::shared_ptr<Material> shapeMaterial)
 void Shape::setScale(const glm::vec3& scale)
 {
     _scale = scale;
+    _aabb->scaleAABB(scale);
     updateModelMatrix();
 }
 
 void Shape::setRotation(const glm::vec3& rotation)
 {
     _rotation = rotation;
+    _aabb->rotateAABB(rotation);
     updateModelMatrix();
 }
 
-void Shape::setPosition(const glm::vec3 &newPosition)
+void Shape::setPosition(const glm::vec3 &position)
 {
-    _position = newPosition;
+    _aabb->translateAABB(position - _position);
+    _position = position;
     updateModelMatrix();
+}
+
+void Shape::setVelocity(const glm::vec3 &velocity)
+{
+    _velocity = velocity;
+}
+
+void Shape::setAcceleration(const glm::vec3 &acceleration)
+{
+    _acceleration = acceleration;
+}
+
+void Shape::setInitialPosition(const glm::vec3 &position)
+{
+    _initialPosition = position;
+}
+
+void Shape::setMass(float mass)
+{
+    _mass = mass;
+}
+
+void Shape::changeGhostRegime()
+{
+    _isGhost = !_isGhost;
+}
+
+void Shape::update(float deltaTime)
+{
+    _velocity += _acceleration * deltaTime;
+    setPosition(_position + _velocity * deltaTime);
+
+    if (_position.y < 0.0f) {
+        _position.y = 0.0f;
+        _velocity.y = 0.0f;
+    }
 }
 
 void Shape::updateModelMatrix() {
@@ -70,6 +109,37 @@ glm::vec3 Shape::getPosition() const
 {
     return _position;
 }
+
+glm::vec3 Shape::getInitialPosition() const
+{
+    return _initialPosition;
+}
+
+glm::vec3 Shape::getVelocity() const
+{
+    return _velocity;
+}
+
+glm::vec3 Shape::getAcceleration() const
+{
+    return _acceleration;
+}
+
+std::shared_ptr<AABB> Shape::getAABB() const
+{
+    return _aabb;
+}
+
+float Shape::getMass() const
+{
+    return _mass;
+}
+
+bool Shape::isGhost() const
+{
+    return _isGhost;
+}
+
 void Shape::loadMatriciesToShader()
 {
     glm::vec3 cameraPosition = glm::vec3(glm::inverse(_viewMatrix)[3]);
@@ -134,12 +204,60 @@ std::string Shape::getType() const
     return type;
 }
 
-void Shape::setModelMatrix(const glm::mat4 &modelMatrix) 
+std::shared_ptr<ShapeMemento> Shape::createMemento() const
+{
+    return std::make_shared<ShapeMemento>(_position, _velocity, _acceleration, _scale, _rotation, _mass, type, _isGhost);
+}
+
+void Shape::restoreFromMemento(const std::shared_ptr<ShapeMemento> &memento)
+{
+    setPosition(memento->getPosition());
+    setVelocity(memento->getVelocity());
+    setAcceleration(memento->getAcceleration());
+    setScale(memento->getScale());
+    setRotation(memento->getRotation());
+    setMass(memento->getMass());
+}
+
+void Shape::saveState()
+{
+    history->saveState(shared_from_this());
+}
+
+void Shape::restoreState()
+{
+    history->restoreState(shared_from_this());
+}
+
+void Shape::initAABB()
+{
+    _aabb->calculateAABB(vertices);
+}
+
+bool Shape::calculateIntersect(std::shared_ptr<Shape> other) const
+{
+    return _aabb->intersect(*other->getAABB());
+}
+
+void Shape::setModelMatrix(const glm::mat4 &modelMatrix)
 {
     _modelMatrix = modelMatrix;
 }
 
-void Shape::setProjectionMatrix(const glm::mat4 &projectionMatrix) 
+void Shape::setProjectionMatrix(const glm::mat4 &projectionMatrix)
 {
     _projectionMatrix = projectionMatrix;
+}
+
+void ShapeHistory::saveState(const std::shared_ptr<Shape> shape)
+{
+    history.push_back(shape->createMemento());
+}
+
+void ShapeHistory::restoreState(std::shared_ptr<Shape> shape)
+{
+    if (!history.empty()) {
+        shape->restoreFromMemento(history.back());
+        history.pop_back();
+    }
 }
