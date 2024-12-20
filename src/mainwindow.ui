@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1053</width>
-    <height>678</height>
+    <width>1096</width>
+    <height>772</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -56,6 +56,27 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="addPointLight">
+          <property name="text">
+           <string>Добавить Point Light</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="addSpotLight">
+          <property name="text">
+           <string>Добавить Source Light</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="addDirectionalLight">
+          <property name="text">
+           <string>Добавить Directional Light</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="addLight">
           <property name="text">
            <string>Добавить свет</string>
@@ -67,7 +88,7 @@
       <item>
        <widget class="QTabWidget" name="tabWidget">
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
@@ -88,6 +109,16 @@
          <attribute name="title">
           <string>Tab 2</string>
          </attribute>
+         <widget class="QListWidget" name="lightSources">
+          <property name="geometry">
+           <rect>
+            <x>-5</x>
+            <y>10</y>
+            <width>261</width>
+            <height>251</height>
+           </rect>
+          </property>
+         </widget>
         </widget>
        </widget>
       </item>
@@ -100,8 +131,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1053</width>
-     <height>22</height>
+     <width>1096</width>
+     <height>23</height>
     </rect>
    </property>
   </widget>

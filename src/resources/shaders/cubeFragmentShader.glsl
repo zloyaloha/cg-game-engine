@@ -1,4 +1,4 @@
-#version 420 core
+#version 330 core
 
 in vec3 Normal;    // Нормаль поверхности
 in vec3 FragPos;

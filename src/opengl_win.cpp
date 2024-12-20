@@ -11,7 +11,7 @@ OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent),
     QSurfaceFormat format;
     format.setDepthBufferSize(24);
     format.setStencilBufferSize(8);
-    format.setVersion(4, 2);
+    format.setVersion(3, 3);
     format.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(format);
 }
@@ -30,6 +30,11 @@ void OpenGLWidget::addLight(std::shared_ptr<Light> light)
 {   
     lights.push_back(light);
     setLigths();
+}
+
+std::vector<std::shared_ptr<Light>> OpenGLWidget::getAllLights()
+{
+    return lights;
 }
 
 std::vector<std::shared_ptr<Shape>> OpenGLWidget::getAllShapes()

@@ -21,6 +21,296 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     openglWidget->resize(920, 512);
 
     connect(ui->listWidget, &QListWidget::itemClicked, this, &MainWindow::onObjectSelected);
+
+    // Work With Light
+    connect(ui->addPointLight, &QPushButton::clicked, this, &MainWindow::addPointLightButtonClicked);
+    connect(ui->addSpotLight, &QPushButton::clicked, this, &MainWindow::addSpotLightButtonClicked);
+    connect(ui->addDirectionalLight, &QPushButton::clicked, this, &MainWindow::addDirectionalLightButtonClicked);
+
+    connect(ui->lightSources, &QListWidget::itemClicked, this, &MainWindow::onLightSourceSelected);
+}
+
+void MainWindow::addItemToLightList(int i, const std::string& light_type)
+{
+    // Создаем новый элемент списка
+    QListWidgetItem* new_light_item = new QListWidgetItem(QString::fromStdString(light_type), ui->lightSources);
+    
+    // Привязываем числовое значение к элементу
+    new_light_item->setData(Qt::UserRole, i);  // Qt::UserRole можно использовать для хранения целых значений
+
+    // Можно также привязать тип (строку) как дополнительные данные
+    new_light_item->setData(Qt::UserRole + 1, QString::fromStdString(light_type));
+
+    // Добавляем элемент в список
+    ui->lightSources->addItem(new_light_item);
+}
+
+void MainWindow::addPointLightButtonClicked()
+{
+    addItemToLightList(i, "Point Light");
+    std::shared_ptr<PointLight> point_light = std::make_shared<PointLight>(
+        glm::vec3(-10.0f, -10.0f, -10.0f) // Позиция источника света
+    );
+
+    openglWidget->addLight(point_light);
+
+    i += 1;
+}
+
+void MainWindow::addSpotLightButtonClicked()
+{
+    addItemToLightList(i, "Spot Light");
+    std::shared_ptr<SpotLight> spot_light = std::make_shared<SpotLight>(
+        glm::vec3(5.0f, 5.0f, 5.0f), // Позиция прожектора
+        glm::vec3(1.0f, 1.0f, 1.0f)  // Направление прожектора
+    );
+
+    openglWidget->addLight(spot_light);
+
+    i += 1;
+}
+
+void MainWindow::addDirectionalLightButtonClicked()
+{
+    addItemToLightList(i, "Directional Light");
+    std::shared_ptr<DirectionalLight> directional_light = std::make_shared<DirectionalLight>(
+        glm::vec3(0.0f, -1.0f, 0.0f) // Направление света (например, вниз)
+    );
+
+    openglWidget->addLight(directional_light);
+
+    i += 1;
+}
+
+void MainWindow::onLightSourceSelected(QListWidgetItem *light_source)
+{
+    // Извлекаем числовое значение (например, ID)
+    int id = light_source->data(Qt::UserRole).toInt();
+
+    // Извлекаем строку с типом
+    QString type = light_source->data(Qt::UserRole + 1).toString();
+
+    // Выводим данные для проверки
+    qDebug() << "Selected Light Source ID: " << id;
+    qDebug() << "Light Source Type: " << type;
+
+    // Например, если у вас есть указатель на объект Shape, привязанный к этим данным
+    // Получаем объект Shape, например, из списка или другой структуры данных
+    std::shared_ptr<Light> selected_light_source;
+    selected_light_source = openglWidget->getAllLights()[id];
+    if (selected_light_source) {
+        Light::LightType light_type = selected_light_source->getType();
+
+        if (light_type == Light::POINT) {
+            qDebug() << "Point Light Settings";
+            showPointLightSourceSettings(selected_light_source);
+        } else if (light_type == Light::SPOT) {
+            qDebug() << "Spot Light Settings";
+            showSpotLightSourceSettings(selected_light_source);
+        } else if (light_type == Light::DIRECTIONAL) {
+            qDebug() << "It works 3";
+            showDirectionalLightSourceSettings(selected_light_source);
+        }
+    }
+}
+
+void MainWindow::showPointLightSourceSettings(std::shared_ptr<Light> pointLight)
+{
+    auto point_light_source = std::dynamic_pointer_cast<PointLight>(pointLight);
+    
+    QDialog settingsDialog;
+    settingsDialog.setWindowTitle("Point Light Source Settings");
+    settingsDialog.resize(300, 400);
+
+    QVBoxLayout *layout = new QVBoxLayout;
+
+    // Параметры позиции
+    QGroupBox *positionGroup = new QGroupBox("Position");
+    QFormLayout *positionLayout = new QFormLayout;
+    QLineEdit *posX = new QLineEdit(QString::number(point_light_source->position.x));
+    QLineEdit *posY = new QLineEdit(QString::number(point_light_source->position.y));
+    QLineEdit *posZ = new QLineEdit(QString::number(point_light_source->position.z));
+    positionLayout->addRow("X:", posX);
+    positionLayout->addRow("Y:", posY);
+    positionLayout->addRow("Z:", posZ);
+    positionGroup->setLayout(positionLayout);
+    layout->addWidget(positionGroup);
+
+    // Параметры цвета
+    QGroupBox *colorGroup = new QGroupBox("Color");
+    QFormLayout *colorLayout = new QFormLayout;
+    QLineEdit *colorR = new QLineEdit(QString::number(point_light_source->color.r));
+    QLineEdit *colorG = new QLineEdit(QString::number(point_light_source->color.g));
+    QLineEdit *colorB = new QLineEdit(QString::number(point_light_source->color.b));
+    colorLayout->addRow("R:", colorR);
+    colorLayout->addRow("G:", colorG);
+    colorLayout->addRow("B:", colorB);
+    colorGroup->setLayout(colorLayout);
+    layout->addWidget(colorGroup);
+
+    // Параметры затухания
+    QGroupBox *attenuationGroup = new QGroupBox("Attenuation");
+    QFormLayout *attenuationLayout = new QFormLayout;
+    QLineEdit *constant = new QLineEdit(QString::number(point_light_source->constant));
+    QLineEdit *linear = new QLineEdit(QString::number(point_light_source->linear));
+    QLineEdit *quadratic = new QLineEdit(QString::number(point_light_source->quadratic));
+    attenuationLayout->addRow("Constant:", constant);
+    attenuationLayout->addRow("Linear:", linear);
+    attenuationLayout->addRow("Quadratic:", quadratic);
+    attenuationGroup->setLayout(attenuationLayout);
+    layout->addWidget(attenuationGroup);
+
+    // Кнопка сохранения
+    QPushButton *saveButton = new QPushButton("Save");
+    connect(saveButton, &QPushButton::clicked, [&]() {
+        point_light_source->position = glm::vec3(posX->text().toFloat(), posY->text().toFloat(), posZ->text().toFloat());
+        point_light_source->color = glm::vec3(colorR->text().toFloat(), colorG->text().toFloat(), colorB->text().toFloat());
+        point_light_source->constant = constant->text().toFloat();
+        point_light_source->linear = linear->text().toFloat();
+        point_light_source->quadratic = quadratic->text().toFloat();
+        settingsDialog.accept();
+    });
+    layout->addWidget(saveButton);
+
+    settingsDialog.setLayout(layout);
+    settingsDialog.exec();
+}
+
+void MainWindow::showSpotLightSourceSettings(std::shared_ptr<Light> spotLight)
+{
+    auto spot_light_source = std::dynamic_pointer_cast<SpotLight>(spotLight);
+
+    QDialog settingsDialog;
+    settingsDialog.setWindowTitle("Spot Light Source Settings");
+    settingsDialog.resize(300, 500);
+
+    QVBoxLayout *layout = new QVBoxLayout;
+
+    // Параметры позиции
+    QGroupBox *positionGroup = new QGroupBox("Position");
+    QFormLayout *positionLayout = new QFormLayout;
+    QLineEdit *posX = new QLineEdit(QString::number(spot_light_source->position.x));
+    QLineEdit *posY = new QLineEdit(QString::number(spot_light_source->position.y));
+    QLineEdit *posZ = new QLineEdit(QString::number(spot_light_source->position.z));
+    positionLayout->addRow("X:", posX);
+    positionLayout->addRow("Y:", posY);
+    positionLayout->addRow("Z:", posZ);
+    positionGroup->setLayout(positionLayout);
+    layout->addWidget(positionGroup);
+
+    // Параметры направления
+    QGroupBox *directionGroup = new QGroupBox("Direction");
+    QFormLayout *directionLayout = new QFormLayout;
+    QLineEdit *dirX = new QLineEdit(QString::number(spot_light_source->direction.x));
+    QLineEdit *dirY = new QLineEdit(QString::number(spot_light_source->direction.y));
+    QLineEdit *dirZ = new QLineEdit(QString::number(spot_light_source->direction.z));
+    directionLayout->addRow("X:", dirX);
+    directionLayout->addRow("Y:", dirY);
+    directionLayout->addRow("Z:", dirZ);
+    directionGroup->setLayout(directionLayout);
+    layout->addWidget(directionGroup);
+
+    // Параметры углов
+    QGroupBox *angleGroup = new QGroupBox("Angles");
+    QFormLayout *angleLayout = new QFormLayout;
+    QLineEdit *cutOff = new QLineEdit(QString::number(glm::degrees(glm::acos(spot_light_source->cutOff))));
+    QLineEdit *outerCutOff = new QLineEdit(QString::number(glm::degrees(glm::acos(spot_light_source->outerCutOff))));
+    angleLayout->addRow("Cut-off (degrees):", cutOff);
+    angleLayout->addRow("Outer Cut-off (degrees):", outerCutOff);
+    angleGroup->setLayout(angleLayout);
+    layout->addWidget(angleGroup);
+
+    // Параметры цвета
+    QGroupBox *colorGroup = new QGroupBox("Color");
+    QFormLayout *colorLayout = new QFormLayout;
+    QLineEdit *colorR = new QLineEdit(QString::number(spot_light_source->color.r));
+    QLineEdit *colorG = new QLineEdit(QString::number(spot_light_source->color.g));
+    QLineEdit *colorB = new QLineEdit(QString::number(spot_light_source->color.b));
+    colorLayout->addRow("R:", colorR);
+    colorLayout->addRow("G:", colorG);
+    colorLayout->addRow("B:", colorB);
+    colorGroup->setLayout(colorLayout);
+    layout->addWidget(colorGroup);
+
+    // Параметры интенсивности
+    QGroupBox *intensityGroup = new QGroupBox("Intensity");
+    QFormLayout *intensityLayout = new QFormLayout;
+    QLineEdit *intensity = new QLineEdit(QString::number(spot_light_source->intensity));
+    intensityLayout->addRow("Intensity:", intensity);
+    intensityGroup->setLayout(intensityLayout);
+    layout->addWidget(intensityGroup);
+
+    // Кнопка сохранения
+    QPushButton *saveButton = new QPushButton("Save");
+    connect(saveButton, &QPushButton::clicked, [&]() {
+        spot_light_source->position = glm::vec3(posX->text().toFloat(), posY->text().toFloat(), posZ->text().toFloat());
+        spot_light_source->direction = glm::vec3(dirX->text().toFloat(), dirY->text().toFloat(), dirZ->text().toFloat());
+        spot_light_source->cutOff = glm::cos(glm::radians(cutOff->text().toFloat()));
+        spot_light_source->outerCutOff = glm::cos(glm::radians(outerCutOff->text().toFloat()));
+        spot_light_source->color = glm::vec3(colorR->text().toFloat(), colorG->text().toFloat(), colorB->text().toFloat());
+        spot_light_source->intensity = intensity->text().toFloat();
+        settingsDialog.accept();
+    });
+    layout->addWidget(saveButton);
+
+    settingsDialog.setLayout(layout);
+    settingsDialog.exec();
+}
+
+void MainWindow::showDirectionalLightSourceSettings(std::shared_ptr<Light> directionalLight)
+{
+    auto directional_light_source = std::dynamic_pointer_cast<DirectionalLight>(directionalLight);
+
+    QDialog settingsDialog;
+    settingsDialog.setWindowTitle("Directional Light Source Settings");
+    settingsDialog.resize(300, 400);
+
+    QVBoxLayout *layout = new QVBoxLayout;
+
+    // Параметры направления
+    QGroupBox *directionGroup = new QGroupBox("Direction");
+    QFormLayout *directionLayout = new QFormLayout;
+    QLineEdit *dirX = new QLineEdit(QString::number(directional_light_source->direction.x));
+    QLineEdit *dirY = new QLineEdit(QString::number(directional_light_source->direction.y));
+    QLineEdit *dirZ = new QLineEdit(QString::number(directional_light_source->direction.z));
+    directionLayout->addRow("X:", dirX);
+    directionLayout->addRow("Y:", dirY);
+    directionLayout->addRow("Z:", dirZ);
+    directionGroup->setLayout(directionLayout);
+    layout->addWidget(directionGroup);
+
+    // Параметры цвета
+    QGroupBox *colorGroup = new QGroupBox("Color");
+    QFormLayout *colorLayout = new QFormLayout;
+    QLineEdit *colorR = new QLineEdit(QString::number(directional_light_source->color.r));
+    QLineEdit *colorG = new QLineEdit(QString::number(directional_light_source->color.g));
+    QLineEdit *colorB = new QLineEdit(QString::number(directional_light_source->color.b));
+    colorLayout->addRow("R:", colorR);
+    colorLayout->addRow("G:", colorG);
+    colorLayout->addRow("B:", colorB);
+    colorGroup->setLayout(colorLayout);
+    layout->addWidget(colorGroup);
+
+    // Параметры интенсивности
+    QGroupBox *intensityGroup = new QGroupBox("Intensity");
+    QFormLayout *intensityLayout = new QFormLayout;
+    QLineEdit *intensity = new QLineEdit(QString::number(directional_light_source->intensity));
+    intensityLayout->addRow("Intensity:", intensity);
+    intensityGroup->setLayout(intensityLayout);
+    layout->addWidget(intensityGroup);
+
+    // Кнопка сохранения
+    QPushButton *saveButton = new QPushButton("Save");
+    connect(saveButton, &QPushButton::clicked, [&]() {
+        directional_light_source->direction = glm::vec3(dirX->text().toFloat(), dirY->text().toFloat(), dirZ->text().toFloat());
+        directional_light_source->color = glm::vec3(colorR->text().toFloat(), colorG->text().toFloat(), colorB->text().toFloat());
+        directional_light_source->intensity = intensity->text().toFloat();
+        settingsDialog.accept();
+    });
+    layout->addWidget(saveButton);
+
+    settingsDialog.setLayout(layout);
+    settingsDialog.exec();
 }
 
 void MainWindow::addCubeButtonClicked()
@@ -396,7 +686,6 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
     settingsDialog.setLayout(layout);
     settingsDialog.exec();
 }
-
 
 MainWindow::~MainWindow() 
 {
