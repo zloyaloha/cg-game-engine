@@ -25,7 +25,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 void MainWindow::addCubeButtonClicked()
 {   
-    addItemToList(i, "cube");
+    std::string name = "cube" + std::to_string(i);
+    addItemToList(i, name);
     std::shared_ptr<Cube> cube = std::make_shared<Cube>(1.0f, glm::vec3(0.0f, 0.0f, 1.0f + i));
     
     std::shared_ptr<Material> material = std::make_shared<Material>();
@@ -64,6 +65,27 @@ void MainWindow::addCubeButtonClicked()
 
 }
 
+std::string MainWindow::getPenultimateWord(const QString& qstringPath) {
+    // Преобразуем QString в std::string
+    std::string path = qstringPath.toStdString();
+    
+    // Разделяем строку по "/"
+    std::vector<std::string> parts;
+    std::stringstream ss(path);
+    std::string segment;
+    while (std::getline(ss, segment, '/')) {
+        parts.push_back(segment);
+    }
+
+    // Проверяем, есть ли достаточно частей
+    if (parts.size() < 2) {
+        return ""; // Возвращаем пустую строку, если частей недостаточно
+    }
+
+    // Возвращаем предпоследнюю часть
+    return parts[parts.size() - 2];
+}
+
 void MainWindow::addMeshButtonClicked()
 {
     QString filePath = QFileDialog::getOpenFileName(this, "Select File", "", "Text Files (*.obj);;All Files (*)");
@@ -74,6 +96,7 @@ void MainWindow::addMeshButtonClicked()
 
     if (QFile::exists(filePath)) {
         qDebug() << "Load mesh from " << filePath;
+        std::string name = getPenultimateWord(filePath);
         ObjLoader loader;
         std::vector<std::shared_ptr<Mesh>> meshes = loader.load(filePath.toStdString());
         for (const auto mesh: meshes) {
@@ -81,8 +104,7 @@ void MainWindow::addMeshButtonClicked()
             mesh->setPosition(glm::vec3(0, 0, 0));
             mesh->setRotation(glm::vec3(0, 0, 0));
             mesh->setScale(glm::vec3(1, 1, 1));
-            addItemToList(i, "mesh");
-
+            addItemToList(i, name);
         }
         qDebug() << "Add" << meshes.size() << "meshes!";
     }
@@ -110,7 +132,8 @@ void MainWindow::addLightButtonClicked()
 }
 
 void MainWindow::addItemToList(int i, const std::string& type)
-{
+{   
+
     // Создаем новый элемент списка
     QListWidgetItem* newItem = new QListWidgetItem(QString::fromStdString(type), ui->listWidget);
     
@@ -136,12 +159,33 @@ void MainWindow::onObjectSelected(QListWidgetItem *item)
     qDebug() << "Selected Item ID: " << id;
     qDebug() << "Item Type: " << type;
 
-    // Например, если у вас есть указатель на объект Shape, привязанный к этим данным
-    // Получаем объект Shape, например, из списка или другой структуры данных
     std::shared_ptr<Shape> selectedShape;
     selectedShape = openglWidget->getAllShapes()[id];
     if (selectedShape) {
-        showObjectSettings(selectedShape);
+        // Создаем диалоговое окно с кнопками "Настройки" и "Удалить"
+        QMessageBox dialog;
+        dialog.setWindowTitle("Действия с объектом");
+        dialog.setText("Выберите действие для объекта:");
+
+        // Кнопка для перехода в настройки объекта
+        QPushButton *settingsButton = dialog.addButton("Настройки", QMessageBox::ActionRole);
+        
+        // Кнопка для удаления объекта
+        QPushButton *deleteButton = dialog.addButton("Удалить", QMessageBox::ActionRole);
+        
+        // Показываем диалог
+        dialog.exec();
+
+        // Проверяем, какая кнопка была нажата
+        if (dialog.clickedButton() == settingsButton) {
+            showObjectSettings(selectedShape);  // Переход в настройки объекта
+        } else if (dialog.clickedButton() == deleteButton) {
+            openglWidget->eraseShape(selectedShape);
+            int row = ui->listWidget->row(item);  // Получаем индекс элемента в списке
+            ui->listWidget->takeItem(row);         // Удаляем элемент из списка
+            delete item; 
+            i -= 1;
+        }
     }
 }
 
@@ -156,7 +200,6 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
 
     // // Компоновка
     QVBoxLayout *layout = new QVBoxLayout();
-    
 
     // Раздел для позиции
     QGroupBox *positionGroup = new QGroupBox("Позиция");
@@ -171,6 +214,48 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
     positionLayout->addRow("z:", positionZ);
     positionGroup->setLayout(positionLayout);
     layout->addWidget(positionGroup);
+
+    // Раздел для Rotation
+    QGroupBox *rotationGroup = new QGroupBox("Rotation");
+    QFormLayout *rotationLayout = new QFormLayout;
+    glm::vec3 rotation = shape->getRotation();
+
+    QLabel *rotXlabel = new QLabel("x:", &settingsDialog);
+    QSlider *rotXSlider = new QSlider(Qt::Horizontal, &settingsDialog);
+    rotXSlider->setRange(0, 359);
+    rotXSlider->setValue(static_cast<int>(rotation.x * 359)); // Значение от 0 до 255
+    QLabel *rotXvalue = new QLabel(QString::number(rotation.x), &settingsDialog);
+    connect(rotXSlider, &QSlider::valueChanged, [rotXvalue](int value) {
+        rotXvalue->setText(QString::number(value / 359.0f, 'f', 2)); // Отображаем значение от 0 до 1
+    });
+
+    QLabel *rotYlabel = new QLabel("y:", &settingsDialog);
+    QSlider *rotYSlider = new QSlider(Qt::Horizontal, &settingsDialog);
+    rotYSlider->setRange(0, 359);
+    rotYSlider->setValue(static_cast<int>(rotation.y * 359)); // Значение от 0 до 255
+    QLabel *rotYvalue = new QLabel(QString::number(rotation.y), &settingsDialog);
+    connect(rotYSlider, &QSlider::valueChanged, [rotYvalue](int value) {
+        rotYvalue->setText(QString::number(value / 359.0f, 'f', 2)); // Отображаем значение от 0 до 1
+    });
+
+    QLabel *rotZlabel = new QLabel("z:", &settingsDialog);
+    QSlider *rotZSlider = new QSlider(Qt::Horizontal, &settingsDialog);
+    rotZSlider->setRange(0, 359);
+    rotZSlider->setValue(static_cast<int>(rotation.z * 359)); // Значение от 0 до 255
+    QLabel *rotZvalue = new QLabel(QString::number(rotation.z), &settingsDialog);
+    connect(rotZSlider, &QSlider::valueChanged, [rotZvalue](int value) {
+        rotZvalue->setText(QString::number(value / 359.0f, 'f', 2)); // Отображаем значение от 0 до 1
+    });
+
+    // Добавление компонентов в layout
+    rotationLayout->addRow(rotXlabel, rotXSlider);
+    rotationLayout->addRow("", rotXvalue); // Значение для r
+    rotationLayout->addRow(rotYlabel, rotYSlider);
+    rotationLayout->addRow("", rotYvalue); // Значение для g
+    rotationLayout->addRow(rotZlabel, rotZSlider);
+    rotationLayout->addRow("", rotZvalue); // Значение для b
+    rotationGroup->setLayout(rotationLayout);
+    layout->addWidget(rotationGroup);
 
     // Раздел для AmbientColor
     QGroupBox *ambientColorGroup = new QGroupBox("AmbientColor");
@@ -331,52 +416,6 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
     scaleLayout->addRow("z:", vecZ);
     scaleGroup->setLayout(scaleLayout);
     layout->addWidget(scaleGroup);
-
-
-    // Раздел для Rotation
-    QGroupBox *rotationGroup = new QGroupBox("Rotation");
-    QFormLayout *rotationLayout = new QFormLayout;
-    glm::vec3 rotation = shape->getRotation();
-
-    QLabel *rotXlabel = new QLabel("x:", &settingsDialog);
-    QSlider *rotXSlider = new QSlider(Qt::Horizontal, &settingsDialog);
-    rotXSlider->setRange(0, 359);
-    rotXSlider->setValue(static_cast<int>(rotation.x * 359)); // Значение от 0 до 255
-    QLabel *rotXvalue = new QLabel(QString::number(rotation.x), &settingsDialog);
-    connect(rotXSlider, &QSlider::valueChanged, [rotXvalue](int value) {
-        rotXvalue->setText(QString::number(value / 359.0f, 'f', 2)); // Отображаем значение от 0 до 1
-    });
-
-    QLabel *rotYlabel = new QLabel("y:", &settingsDialog);
-    QSlider *rotYSlider = new QSlider(Qt::Horizontal, &settingsDialog);
-    rotYSlider->setRange(0, 359);
-    rotYSlider->setValue(static_cast<int>(rotation.y * 359)); // Значение от 0 до 255
-    QLabel *rotYvalue = new QLabel(QString::number(rotation.y), &settingsDialog);
-    connect(rotYSlider, &QSlider::valueChanged, [rotYvalue](int value) {
-        rotYvalue->setText(QString::number(value / 359.0f, 'f', 2)); // Отображаем значение от 0 до 1
-    });
-
-    QLabel *rotZlabel = new QLabel("z:", &settingsDialog);
-    QSlider *rotZSlider = new QSlider(Qt::Horizontal, &settingsDialog);
-    rotZSlider->setRange(0, 359);
-    rotZSlider->setValue(static_cast<int>(rotation.z * 359)); // Значение от 0 до 255
-    QLabel *rotZvalue = new QLabel(QString::number(rotation.z), &settingsDialog);
-    connect(rotZSlider, &QSlider::valueChanged, [rotZvalue](int value) {
-        rotZvalue->setText(QString::number(value / 359.0f, 'f', 2)); // Отображаем значение от 0 до 1
-    });
-
-    // Добавление компонентов в layout
-    rotationLayout->addRow(rotXlabel, rotXSlider);
-    rotationLayout->addRow("", rotXvalue); // Значение для r
-    rotationLayout->addRow(rotYlabel, rotYSlider);
-    rotationLayout->addRow("", rotYvalue); // Значение для g
-    rotationLayout->addRow(rotZlabel, rotZSlider);
-    rotationLayout->addRow("", rotZvalue); // Значение для b
-    rotationGroup->setLayout(rotationLayout);
-    layout->addWidget(rotationGroup);
-
-
-    
 
     // Кнопка сохранения
     QPushButton *saveButton = new QPushButton("Сохранить");

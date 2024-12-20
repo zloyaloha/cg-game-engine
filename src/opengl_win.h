@@ -29,6 +29,7 @@ public:
     void addShape(std::shared_ptr<Shape> shape);
     void addLight(std::shared_ptr<Light> light);
     std::vector<std::shared_ptr<Shape>> getAllShapes();
+    void eraseShape(std::shared_ptr<Shape> shape);
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;

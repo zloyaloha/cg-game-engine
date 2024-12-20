@@ -29,6 +29,8 @@ public:
     void onObjectSelected(QListWidgetItem *item);
     void showObjectSettings(std::shared_ptr<Shape> shape);
     ~MainWindow();
+private:
+    std::string getPenultimateWord(const QString& qstringPath);
 public slots:
     void addLightButtonClicked();
     void addCubeButtonClicked();

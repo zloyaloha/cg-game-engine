@@ -37,6 +37,14 @@ std::vector<std::shared_ptr<Shape>> OpenGLWidget::getAllShapes()
     return shapes;
 }
 
+void OpenGLWidget::eraseShape(std::shared_ptr<Shape> shape)
+{
+    auto it = std::find(this->shapes.begin(), this->shapes.end(), shape);
+    if (it != this->shapes.end()) {
+        this->shapes.erase(it); 
+    }
+}
+
 void OpenGLWidget::createShaders() {
     shaders["cube"] = std::make_shared<QOpenGLShaderProgram>();
     shaders["cube"]->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/cubeVertexShader.glsl");
