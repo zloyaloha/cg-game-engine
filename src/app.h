@@ -27,7 +27,7 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     void addItemToList(int i, const std::string& type);
     void onObjectSelected(QListWidgetItem *item);
-    void showObjectSettings(std::shared_ptr<Shape> shape);
+    void showObjectSettings(std::shared_ptr<Shape> shape, int groupId);
     ~MainWindow();
 private:
     std::string getPenultimateWord(const QString& qstringPath);
@@ -46,4 +46,5 @@ private:
     Ui::MainWindow* ui;
     OpenGLWidget* openglWidget;
     QStringListModel* listModel;
+    std::unordered_map<int, std::vector<std::shared_ptr<Mesh>>> objectGroups;
 };
