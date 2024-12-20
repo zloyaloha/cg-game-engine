@@ -60,6 +60,18 @@ class Shape : public std::enable_shared_from_this<Shape> {
         glm::vec3 getScale() const;
         glm::vec3 getRotation() const;
         glm::vec3 getPosition() const;
+
+        
+        void setAmbientColor(const glm::vec3& color);
+        void setDiffuseColor(const glm::vec3& color);
+        void setSpecularColor(const glm::vec3& color);
+        void setShininess(const float value);
+
+        glm::vec3 getAmbientColor();
+        glm::vec3 getDiffuseColor();
+        glm::vec3 getSpecularColor(); 
+        float getShininess();
+
         glm::vec3 getInitialPosition() const;
         glm::vec3 getVelocity() const;
         glm::vec3 getAcceleration() const;
@@ -73,11 +85,14 @@ class Shape : public std::enable_shared_from_this<Shape> {
         void saveState();
         void restoreState();
 
+
         void loadMatriciesToShader();
         void loadLightsToShader();
         void loadMaterialToShader();
 
         void setLights(const std::vector<std::shared_ptr<Light>>& light);
+
+        std::string getType() const;
 
         void update(float deltaTime);
         void initAABB();

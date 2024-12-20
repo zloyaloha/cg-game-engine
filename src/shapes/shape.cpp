@@ -110,6 +110,45 @@ glm::vec3 Shape::getPosition() const
     return _position;
 }
 
+void Shape::setAmbientColor(const glm::vec3 &color)
+{
+    this->material->ambientColor = color;
+}
+
+void Shape::setDiffuseColor(const glm::vec3 &color)
+{
+    this->material->diffuseColor = color;
+}
+
+void Shape::setSpecularColor(const glm::vec3 &color)
+{
+    this->material->specularColor = color;
+}
+
+void Shape::setShininess(const float value)
+{
+    this->material->shininess = value;
+}
+
+glm::vec3 Shape::getAmbientColor()
+{
+    return this->material->ambientColor;
+}
+
+glm::vec3 Shape::getDiffuseColor()
+{
+    return glm::vec3(this->material->diffuseColor);
+}
+
+glm::vec3 Shape::getSpecularColor()
+{
+    return glm::vec3(this->material->specularColor);
+}
+
+float Shape::getShininess()
+{
+    return this->material->shininess;
+
 glm::vec3 Shape::getInitialPosition() const
 {
     return _initialPosition;

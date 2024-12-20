@@ -16,6 +16,11 @@
 #include <memory>
 #include "camera.h"
 #include <QTimer>
+#include <QDialog>
+#include <QListWidget>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <iostream>
 #include "physics.h"
 #include <thread>
 
@@ -26,6 +31,9 @@ public:
     OpenGLWidget(QWidget *parent = nullptr);
     void addShape(std::shared_ptr<Shape> shape);
     void addLight(std::shared_ptr<Light> light);
+    std::vector<std::shared_ptr<Shape>> getAllShapes();
+    void eraseShape(std::shared_ptr<Shape> shape);
+
     int getFPS();
     void startScene();
     void changeCameraProjection();

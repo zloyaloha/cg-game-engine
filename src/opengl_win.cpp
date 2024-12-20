@@ -46,9 +46,22 @@ void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
 }
 
 void OpenGLWidget::addLight(std::shared_ptr<Light> light)
-{
+{   
     lights.push_back(light);
     setLigths();
+}
+
+std::vector<std::shared_ptr<Shape>> OpenGLWidget::getAllShapes()
+{
+    return shapes;
+}
+
+void OpenGLWidget::eraseShape(std::shared_ptr<Shape> shape)
+{
+    auto it = std::find(this->shapes.begin(), this->shapes.end(), shape);
+    if (it != this->shapes.end()) {
+        this->shapes.erase(it); 
+    }
 }
 
 void OpenGLWidget::updateFPS()
@@ -169,6 +182,7 @@ void OpenGLWidget::paintGL()
 }
 
 void OpenGLWidget::keyPressEvent(QKeyEvent *event) {
+    
     keys[event->key()] = true;
 }
 
