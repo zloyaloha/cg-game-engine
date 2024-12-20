@@ -1,10 +1,10 @@
 #include "shape.h"
 #include "iostream"
 
-Shape::Shape(const glm::vec3& shapePosition, const std::string& shapeType) : 
-    position(shapePosition), type(shapeType), _aabb(std::make_shared<AABB>()) {}
+Shape::Shape(const glm::vec3& shapePosition, const std::string& shapeType) :
+    _position(shapePosition), type(shapeType), _aabb(std::make_shared<AABB>()), history(std::make_shared<ShapeHistory>()) {}
 
-void Shape::setViewMatrix(const glm::mat4 &viewMatrix) 
+void Shape::setViewMatrix(const glm::mat4 &viewMatrix)
 {
     _viewMatrix = viewMatrix;
 }
@@ -55,6 +55,21 @@ void Shape::setAcceleration(const glm::vec3 &acceleration)
     _acceleration = acceleration;
 }
 
+void Shape::setInitialPosition(const glm::vec3 &position)
+{
+    _initialPosition = position;
+}
+
+void Shape::setMass(float mass)
+{
+    _mass = mass;
+}
+
+void Shape::changeGhostRegime()
+{
+    _isGhost = !_isGhost;
+}
+
 void Shape::update(float deltaTime)
 {
     _velocity += _acceleration * deltaTime;
@@ -95,6 +110,11 @@ glm::vec3 Shape::getPosition() const
     return _position;
 }
 
+glm::vec3 Shape::getInitialPosition() const
+{
+    return _initialPosition;
+}
+
 glm::vec3 Shape::getVelocity() const
 {
     return _velocity;
@@ -108,6 +128,16 @@ glm::vec3 Shape::getAcceleration() const
 std::shared_ptr<AABB> Shape::getAABB() const
 {
     return _aabb;
+}
+
+float Shape::getMass() const
+{
+    return _mass;
+}
+
+bool Shape::isGhost() const
+{
+    return _isGhost;
 }
 
 void Shape::loadMatriciesToShader()
@@ -174,6 +204,31 @@ std::string Shape::getType() const
     return type;
 }
 
+std::shared_ptr<ShapeMemento> Shape::createMemento() const
+{
+    return std::make_shared<ShapeMemento>(_position, _velocity, _acceleration, _scale, _rotation, _mass, type, _isGhost);
+}
+
+void Shape::restoreFromMemento(const std::shared_ptr<ShapeMemento> &memento)
+{
+    setPosition(memento->getPosition());
+    setVelocity(memento->getVelocity());
+    setAcceleration(memento->getAcceleration());
+    setScale(memento->getScale());
+    setRotation(memento->getRotation());
+    setMass(memento->getMass());
+}
+
+void Shape::saveState()
+{
+    history->saveState(shared_from_this());
+}
+
+void Shape::restoreState()
+{
+    history->restoreState(shared_from_this());
+}
+
 void Shape::initAABB()
 {
     _aabb->calculateAABB(vertices);
@@ -184,12 +239,25 @@ bool Shape::calculateIntersect(std::shared_ptr<Shape> other) const
     return _aabb->intersect(*other->getAABB());
 }
 
-void Shape::setModelMatrix(const glm::mat4 &modelMatrix) 
+void Shape::setModelMatrix(const glm::mat4 &modelMatrix)
 {
     _modelMatrix = modelMatrix;
 }
 
-void Shape::setProjectionMatrix(const glm::mat4 &projectionMatrix) 
+void Shape::setProjectionMatrix(const glm::mat4 &projectionMatrix)
 {
     _projectionMatrix = projectionMatrix;
+}
+
+void ShapeHistory::saveState(const std::shared_ptr<Shape> shape)
+{
+    history.push_back(shape->createMemento());
+}
+
+void ShapeHistory::restoreState(std::shared_ptr<Shape> shape)
+{
+    if (!history.empty()) {
+        shape->restoreFromMemento(history.back());
+        history.pop_back();
+    }
 }

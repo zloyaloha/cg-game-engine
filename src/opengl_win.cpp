@@ -28,15 +28,20 @@ void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
     shape->setProjectionMatrix(camera.getProjectionMatrix(aspectRatio));
     shape->setViewMatrix(camera.getViewMatrix());
     shape->setAcceleration(glm::vec3(0,0,0));
-    if (shape->getType() == "mesh") {
-        shape->setVelocity(glm::vec3(0.1, 0, 0));
-    } else {
-        shape->setVelocity(glm::vec3(0, 0, 0));
-    }
     shape->initialize();
     shapes.push_back(shape);
     setLigths();
     update();
+    if (shape->getType() == "mesh") {
+        shape->setVelocity(glm::vec3(0, 0, 0.01));
+        shape->setMass(2);
+        shape->changeGhostRegime();
+    } else {
+        shape->setPosition(glm::vec3(-2.5, 0, 6));
+        shape->setVelocity(glm::vec3(0, 0, 0));
+        shape->setMass(3);
+        shape->changeGhostRegime();
+    }
     shaders[shape->getType()]->release();
 }
 
@@ -57,19 +62,6 @@ void OpenGLWidget::updateFPS()
     }
 }
 
-void OpenGLWidget::calculateIntersect() const
-{
-    for (int i = 0; i < shapes.size(); ++i) {
-        for (int j = i + 1; j < shapes.size(); ++j) {
-            if (shapes[i]->calculateIntersect(shapes[j])) {
-                std::cout << "Intersect!" << std::endl;
-                return;
-            }
-        }
-    }
-    std::cout << "Don't Intersect!" << std::endl;
-}
-
 int OpenGLWidget::getFPS()
 {
     return FPS;
@@ -77,12 +69,24 @@ int OpenGLWidget::getFPS()
 
 void OpenGLWidget::startScene()
 {
+    if (!started) {
+        for (auto shape: shapes) {
+            shape->saveState();
+        }
+    }
     started = !started;
 }
 
 void OpenGLWidget::changeCameraProjection()
 {
     camera.changeProjection();
+}
+
+void OpenGLWidget::restorePosition()
+{
+    for (auto shape: shapes) {
+        shape->restoreState();
+    }
 }
 
 void OpenGLWidget::createShaders()
@@ -116,7 +120,7 @@ void OpenGLWidget::createVaos()
 
 void OpenGLWidget::setTimer() {
     timer = new QTimer(this);
-    timer->setInterval(1);
+    timer->setInterval(16);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
     timer->start();
 }
@@ -137,16 +141,23 @@ void OpenGLWidget::resizeGL(int w, int h)
 }
 
 void OpenGLWidget::paintGL()
-{   
+{
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     updateCamera();
 
+    // if (started) {
+    //     if (physicsThread.joinable()) {
+    //         physicsThread.join();
+    //     }
+    //     physicsThread = std::thread(&Physics::calculateIntersect, &physic, std::ref(shapes));
+    // }
+
     if (started) {
-        calculateIntersect();
+        physic.calculateIntersect(shapes);
     }
 
-    for (auto shape: shapes) {
+    for (auto shape : shapes) {
         shape->setViewMatrix(camera.getViewMatrix());
         shape->setProjectionMatrix(camera.getProjectionMatrix((float)width() / (float)height()));
         if (started) {

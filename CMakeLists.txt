@@ -24,6 +24,7 @@ set(WINDOWS_SRC
     src/app.cpp
     src/opengl_win.cpp
     src/camera.cpp
+    src/physics.cpp
 )
 
 set(SHAPES_SRC

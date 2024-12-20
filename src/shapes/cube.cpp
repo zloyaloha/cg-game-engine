@@ -9,14 +9,13 @@ struct Vertex {
     glm::vec3 normal;
 };
 
-Cube::Cube(float size, const glm::vec3 &position) : 
+Cube::Cube(float size, const glm::vec3 &position) :
     Shape(position, "cube"), size(size) {}
 
 
 void Cube::generateVertices()
 {
     float half = size / 2.0f;
-    
     vertices = {
         glm::vec3(-half, half, half),
         glm::vec3(-half, half, -half),

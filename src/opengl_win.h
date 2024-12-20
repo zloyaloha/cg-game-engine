@@ -16,6 +16,8 @@
 #include <memory>
 #include "camera.h"
 #include <QTimer>
+#include "physics.h"
+#include <thread>
 
 class OpenGLWidget : public QOpenGLWidget {
     Q_OBJECT
@@ -27,6 +29,7 @@ public:
     int getFPS();
     void startScene();
     void changeCameraProjection();
+    void restorePosition();
 protected:
     void createVaos();
     void createShaders();
@@ -37,7 +40,6 @@ protected:
 
     void updateFPS();
 
-    void calculateIntersect() const;
     void setTimer();
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
@@ -61,10 +63,12 @@ private:
     float lastTime;
     int FPS;
     bool started{false};
+    Physics physic;
     std::vector<std::shared_ptr<Light>> lights;
     std::vector<std::shared_ptr<Shape>> shapes;
     std::unordered_map<std::string, std::shared_ptr<QOpenGLShaderProgram>> shaders;
     std::unordered_map<std::string, std::shared_ptr<QOpenGLVertexArrayObject>> vaos;
+    std::thread physicsThread;
 private:
     void updateCamera();
     void setLigths();

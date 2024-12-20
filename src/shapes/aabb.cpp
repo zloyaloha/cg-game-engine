@@ -72,3 +72,23 @@ void AABB::rotateAABB(const glm::vec3& rotation)
     min = newMin;
     max = newMax;
 }
+
+glm::vec3 AABB::getMin() const
+{
+    return min;
+}
+
+glm::vec3 AABB::getMax() const
+{
+    return max;
+}
+
+glm::vec3 &AABB::getMin()
+{
+    return min;
+}
+
+glm::vec3 &AABB::getMax()
+{
+    return max;
+}
