@@ -47,4 +47,5 @@ private:
     OpenGLWidget* openglWidget;
     QStringListModel* listModel;
     std::unordered_map<int, std::vector<std::shared_ptr<Mesh>>> objectGroups;
+    int groupId{0};
 };

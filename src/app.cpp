@@ -80,7 +80,7 @@ void MainWindow::addMeshButtonClicked()
         return;
     }
 
-    int groupId = 0;
+    
     std::vector<std::shared_ptr<Mesh>> groupMeshes;
     
 
@@ -178,11 +178,25 @@ void MainWindow::onObjectSelected(QListWidgetItem *item)
         if (dialog.clickedButton() == settingsButton) {
             showObjectSettings(selectedShape, id);
         } else if (dialog.clickedButton() == deleteButton) {
-            openglWidget->eraseShape(selectedShape);
-            int row = ui->listWidget->row(item);
-            ui->listWidget->takeItem(row);
-            delete item; 
-            i -= 1;
+            if (!type.startsWith("cube")) {
+                for (auto mesh: objectGroups[id]) {
+                    openglWidget->eraseShape(mesh);
+                    // std::cout << "Deleted mesh" << std::endl;
+                }
+                int row = ui->listWidget->row(item);
+                ui->listWidget->takeItem(row);
+                delete item;
+                objectGroups.erase(id);
+                groupId -= 1;
+            } else {
+                openglWidget->eraseShape(selectedShape);
+                int row = ui->listWidget->row(item);
+                ui->listWidget->takeItem(row);
+                delete item; 
+                i -= 1;
+            }
+            
+        
         }
     }
 }
@@ -414,7 +428,8 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
     connect(saveButton, &QPushButton::clicked, [&]() {
          if (shape->getType() == "mesh") {
             for (auto& mesh: objectGroups[groupId]) {
-                mesh->setPosition(glm::vec3(positionX->text().toFloat(), positionY->text().toFloat(), positionZ->text().toFloat()));
+                glm::vec3 mesh_pos = mesh->getPosition();
+                mesh->setPosition(glm::vec3(mesh_pos.x + positionX->text().toFloat(), mesh_pos.y + positionY->text().toFloat(), mesh_pos.z + positionZ->text().toFloat()));
             }
         } else {
             shape->setPosition(glm::vec3(positionX->text().toFloat(), positionY->text().toFloat(), positionZ->text().toFloat()));
