@@ -6,84 +6,214 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1333</width>
-    <height>735</height>
+    <width>1300</width>
+    <height>722</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <layout class="QHBoxLayout" name="horizontalLayout_5">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QOpenGLWidget" name="openGLWidget">
-          <property name="minimumSize">
-           <size>
-            <width>910</width>
-            <height>512</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>910</width>
-            <height>512</height>
-           </size>
-          </property>
-          <property name="baseSize">
-           <size>
-            <width>0</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="addCube">
-          <property name="text">
-           <string>Добавить куб</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="addMesh">
-          <property name="text">
-           <string>Добавить объект</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="addPointLight">
-          <property name="text">
-           <string>Добавить Point Light</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="addSpotLight">
-          <property name="text">
-           <string>Добавить Source Light</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="addDirectionalLight">
-          <property name="text">
-           <string>Добавить Directional Light</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="addLight">
-          <property name="text">
-           <string>Добавить свет</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QFrame" name="buttons">
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QFrame" name="buttonsLayout">
+           <property name="frameShape">
+            <enum>QFrame::Box</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Sunken</enum>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3" stretch="100,0,0,0,0,0,0">
+            <property name="spacing">
+             <number>1</number>
+            </property>
+            <property name="sizeConstraint">
+             <enum>QLayout::SetDefaultConstraint</enum>
+            </property>
+            <item>
+             <widget class="QPushButton" name="addCube">
+              <property name="text">
+               <string>Добавить куб</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="addMesh">
+              <property name="text">
+               <string>Добавить объект</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="addDirectionalLight">
+              <property name="text">
+               <string>Точечный источник</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="addSpotLight">
+              <property name="text">
+               <string>Прожектор</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="addPointLight">
+              <property name="text">
+               <string>Направленный свет</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="changeProjection">
+              <property name="text">
+               <string>Поменять проекцию</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout">
+             <item>
+              <widget class="QFrame" name="fpsFrame">
+               <property name="frameShape">
+                <enum>QFrame::Panel</enum>
+               </property>
+               <property name="frameShadow">
+                <enum>QFrame::Raised</enum>
+               </property>
+               <layout class="QHBoxLayout" name="horizontalLayout_2">
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
+                  <property name="spacing">
+                   <number>100</number>
+                  </property>
+                  <property name="sizeConstraint">
+                   <enum>QLayout::SetNoConstraint</enum>
+                  </property>
+                  <item>
+                   <widget class="QLabel" name="label">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">font: 75 28pt &quot;Ubuntu Mono&quot;;</string>
+                    </property>
+                    <property name="text">
+                     <string>FPS</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLCDNumber" name="fps">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="layoutDirection">
+                     <enum>Qt::RightToLeft</enum>
+                    </property>
+                    <property name="autoFillBackground">
+                     <bool>false</bool>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">font: 48pt &quot;Sans Serif&quot;;</string>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <widget class="QOpenGLWidget" name="openGLWidget">
+               <property name="minimumSize">
+                <size>
+                 <width>910</width>
+                 <height>512</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>910</width>
+                 <height>512</height>
+                </size>
+               </property>
+               <property name="baseSize">
+                <size>
+                 <width>0</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="startScene">
+               <property name="text">
+                <string>Запуск!</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="restorePosition">
+               <property name="text">
+                <string>Вернуть на изначальные позиции</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </item>
       <item>
        <widget class="QTabWidget" name="tabWidget">
@@ -92,7 +222,7 @@
         </property>
         <widget class="QWidget" name="tab">
          <attribute name="title">
-          <string>Tab 1</string>
+          <string>Объекты</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
@@ -102,18 +232,13 @@
         </widget>
         <widget class="QWidget" name="tab_2">
          <attribute name="title">
-          <string>Tab 2</string>
+          <string>Источники</string>
          </attribute>
-         <widget class="QListWidget" name="lightSources">
-          <property name="geometry">
-           <rect>
-            <x>-5</x>
-            <y>10</y>
-            <width>261</width>
-            <height>251</height>
-           </rect>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QListWidget" name="lightSources"/>
+          </item>
+         </layout>
         </widget>
        </widget>
       </item>
@@ -126,7 +251,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1333</width>
+     <width>1300</width>
      <height>20</height>
     </rect>
    </property>
