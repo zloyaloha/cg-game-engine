@@ -2,7 +2,7 @@
 #include "iostream"
 
 Shape::Shape(const glm::vec3& shapePosition, const std::string& shapeType) : 
-    position(shapePosition), type(shapeType) {}
+    position(shapePosition), type(shapeType), _aabb(std::make_shared<AABB>()) {}
 
 void Shape::setViewMatrix(const glm::mat4 &viewMatrix) 
 {
@@ -27,19 +27,43 @@ void Shape::setMaterial(std::shared_ptr<Material> shapeMaterial)
 void Shape::setScale(const glm::vec3& scale)
 {
     _scale = scale;
+    _aabb->scaleAABB(scale);
     updateModelMatrix();
 }
 
 void Shape::setRotation(const glm::vec3& rotation)
 {
     _rotation = rotation;
+    _aabb->rotateAABB(rotation);
     updateModelMatrix();
 }
 
-void Shape::setPosition(const glm::vec3 &newPosition)
+void Shape::setPosition(const glm::vec3 &position)
 {
-    _position = newPosition;
+    _aabb->translateAABB(position - _position);
+    _position = position;
     updateModelMatrix();
+}
+
+void Shape::setVelocity(const glm::vec3 &velocity)
+{
+    _velocity = velocity;
+}
+
+void Shape::setAcceleration(const glm::vec3 &acceleration)
+{
+    _acceleration = acceleration;
+}
+
+void Shape::update(float deltaTime)
+{
+    _velocity += _acceleration * deltaTime;
+    setPosition(_position + _velocity * deltaTime);
+
+    if (_position.y < 0.0f) {
+        _position.y = 0.0f;
+        _velocity.y = 0.0f;
+    }
 }
 
 void Shape::updateModelMatrix() {
@@ -70,6 +94,22 @@ glm::vec3 Shape::getPosition() const
 {
     return _position;
 }
+
+glm::vec3 Shape::getVelocity() const
+{
+    return _velocity;
+}
+
+glm::vec3 Shape::getAcceleration() const
+{
+    return _acceleration;
+}
+
+std::shared_ptr<AABB> Shape::getAABB() const
+{
+    return _aabb;
+}
+
 void Shape::loadMatriciesToShader()
 {
     glm::vec3 cameraPosition = glm::vec3(glm::inverse(_viewMatrix)[3]);
@@ -132,6 +172,16 @@ void Shape::setLights(const std::vector<std::shared_ptr<Light>> &shapeLights)
 std::string Shape::getType() const
 {
     return type;
+}
+
+void Shape::initAABB()
+{
+    _aabb->calculateAABB(vertices);
+}
+
+bool Shape::calculateIntersect(std::shared_ptr<Shape> other) const
+{
+    return _aabb->intersect(*other->getAABB());
 }
 
 void Shape::setModelMatrix(const glm::mat4 &modelMatrix) 

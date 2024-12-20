@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->addLight, &QPushButton::clicked, this, &MainWindow::addLightButtonClicked);
     connect(ui->addMesh, &QPushButton::clicked, this, &MainWindow::addMeshButtonClicked);
     connect(ui->changeProjection, &QPushButton::clicked, this, &MainWindow::changeProjectionButtonClicked);
+    connect(ui->startScene, &QPushButton::clicked, this, &MainWindow::startScene);
     setWindowTitle("Игры Разума");
     setGeometry(400, 200, 1280, 720);
 
@@ -94,6 +95,11 @@ void MainWindow::addMeshButtonClicked()
 void MainWindow::changeProjectionButtonClicked()
 {
     openglWidget->changeCameraProjection();
+}
+
+void MainWindow::startScene()
+{
+    openglWidget->startScene();
 }
 
 void MainWindow::addLightButtonClicked() 

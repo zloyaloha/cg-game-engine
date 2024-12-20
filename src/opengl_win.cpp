@@ -27,6 +27,12 @@ void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
     shape->setVao(vaos[shape->getType()]);
     shape->setProjectionMatrix(camera.getProjectionMatrix(aspectRatio));
     shape->setViewMatrix(camera.getViewMatrix());
+    shape->setAcceleration(glm::vec3(0,0,0));
+    if (shape->getType() == "mesh") {
+        shape->setVelocity(glm::vec3(0.1, 0, 0));
+    } else {
+        shape->setVelocity(glm::vec3(0, 0, 0));
+    }
     shape->initialize();
     shapes.push_back(shape);
     setLigths();
@@ -42,7 +48,7 @@ void OpenGLWidget::addLight(std::shared_ptr<Light> light)
 
 void OpenGLWidget::updateFPS()
 {
-    float currentTime = static_cast<float>(QTime::currentTime().msec());
+    float currentTime = static_cast<float>(QTime::currentTime().msecsSinceStartOfDay());
     deltaTime = currentTime - lastTime;
     lastTime = currentTime;
     if (deltaTime > 0.0f) {
@@ -51,9 +57,27 @@ void OpenGLWidget::updateFPS()
     }
 }
 
+void OpenGLWidget::calculateIntersect() const
+{
+    for (int i = 0; i < shapes.size(); ++i) {
+        for (int j = i + 1; j < shapes.size(); ++j) {
+            if (shapes[i]->calculateIntersect(shapes[j])) {
+                std::cout << "Intersect!" << std::endl;
+                return;
+            }
+        }
+    }
+    std::cout << "Don't Intersect!" << std::endl;
+}
+
 int OpenGLWidget::getFPS()
 {
     return FPS;
+}
+
+void OpenGLWidget::startScene()
+{
+    started = !started;
 }
 
 void OpenGLWidget::changeCameraProjection()
@@ -61,7 +85,8 @@ void OpenGLWidget::changeCameraProjection()
     camera.changeProjection();
 }
 
-void OpenGLWidget::createShaders() {
+void OpenGLWidget::createShaders()
+{
     shaders["cube"] = std::make_shared<QOpenGLShaderProgram>();
     shaders["cube"]->addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/cubeVertexShader.glsl");
     shaders["cube"]->addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/cubeFragmentShader.glsl");
@@ -91,17 +116,16 @@ void OpenGLWidget::createVaos()
 
 void OpenGLWidget::setTimer() {
     timer = new QTimer(this);
-    timer->setInterval(32);  // Интервал 16 мс (примерно 60 кадров в секунду)
+    timer->setInterval(1);
     connect(timer, SIGNAL(timeout()), this, SLOT(update()));
     timer->start();
-    qDebug() << "Timer started";
 }
 
 void OpenGLWidget::initializeGL() {
     createShaders();
     createVaos();
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    f->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    f->glClearColor(0.7f, 0.7f, 0.7f, 1);
     f->glEnable(GL_DEPTH_TEST);
     f->glEnable(GL_PROGRAM_POINT_SIZE);
     setTimer();
@@ -117,9 +141,17 @@ void OpenGLWidget::paintGL()
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     updateCamera();
+
+    if (started) {
+        calculateIntersect();
+    }
+
     for (auto shape: shapes) {
         shape->setViewMatrix(camera.getViewMatrix());
         shape->setProjectionMatrix(camera.getProjectionMatrix((float)width() / (float)height()));
+        if (started) {
+            shape->update(deltaTime / 1000);
+        }
         shape->draw();
     }
     ++frameCount;

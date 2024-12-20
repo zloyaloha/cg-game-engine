@@ -8,7 +8,7 @@ void Mesh::initialize() {
     shaderProgram->bind();
     _vao->bind();
     pos = shaderProgram->attributeLocation("aPos");
-    normal = shaderProgram->attributeLocation("aNormal");
+    _normal = shaderProgram->attributeLocation("aNormal");
     tex = shaderProgram->attributeLocation("aTexCoord");
 
     textureBuffer.create();
@@ -22,8 +22,8 @@ void Mesh::initialize() {
     normalBuffer.bind();
     normalBuffer.allocate(&normals[0], normals.size() * sizeof(glm::vec3));
     normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    shaderProgram->setAttributeBuffer(normal, GL_FLOAT, 0, 3);
-    shaderProgram->enableAttributeArray(normal);
+    shaderProgram->setAttributeBuffer(_normal, GL_FLOAT, 0, 3);
+    shaderProgram->enableAttributeArray(_normal);
 
     vertexBuffer.create();
     vertexBuffer.bind();
@@ -49,8 +49,8 @@ void Mesh::draw() {
     shaderProgram->enableAttributeArray(pos);
 
     normalBuffer.bind();
-    shaderProgram->setAttributeBuffer(normal, GL_FLOAT, 0, 3);
-    shaderProgram->enableAttributeArray(normal);
+    shaderProgram->setAttributeBuffer(_normal, GL_FLOAT, 0, 3);
+    shaderProgram->enableAttributeArray(_normal);
 
     textureBuffer.bind();
     shaderProgram->setAttributeBuffer(tex, GL_FLOAT, 0, 2);

@@ -80,6 +80,7 @@ void Cube::generateVertices()
         16, 17, 18,  16, 18, 19, // Нижняя грань
         20, 21, 22,  20, 22, 23  // Верхняя грань
     };
+    initAABB();
 }
 
 void Cube::initialize() {
@@ -88,14 +89,14 @@ void Cube::initialize() {
     shaderProgram->bind();
     _vao->bind();
     pos = shaderProgram->attributeLocation("aPos");
-    normal = shaderProgram->attributeLocation("aNormal");
+    _normal = shaderProgram->attributeLocation("aNormal");
 
     normalBuffer.create();
     normalBuffer.bind();
     normalBuffer.allocate(&normals[0], normals.size() * sizeof(glm::vec3));
     normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
-    shaderProgram->setAttributeBuffer(normal, GL_FLOAT, 0, 3);
-    shaderProgram->enableAttributeArray(normal);
+    shaderProgram->setAttributeBuffer(_normal, GL_FLOAT, 0, 3);
+    shaderProgram->enableAttributeArray(_normal);
 
     vertexBuffer.create();
     vertexBuffer.bind();
@@ -122,8 +123,8 @@ void Cube::draw()
     shaderProgram->enableAttributeArray(pos);
 
     normalBuffer.bind();
-    shaderProgram->setAttributeBuffer(normal, GL_FLOAT, 0, 3);
-    shaderProgram->enableAttributeArray(normal);
+    shaderProgram->setAttributeBuffer(_normal, GL_FLOAT, 0, 3);
+    shaderProgram->enableAttributeArray(_normal);
 
     indexBuffer.bind();
 

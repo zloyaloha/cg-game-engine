@@ -25,6 +25,7 @@ public:
     void addShape(std::shared_ptr<Shape> shape);
     void addLight(std::shared_ptr<Light> light);
     int getFPS();
+    void startScene();
     void changeCameraProjection();
 protected:
     void createVaos();
@@ -36,6 +37,7 @@ protected:
 
     void updateFPS();
 
+    void calculateIntersect() const;
     void setTimer();
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
@@ -58,7 +60,7 @@ private:
     float deltaTime;
     float lastTime;
     int FPS;
-
+    bool started{false};
     std::vector<std::shared_ptr<Light>> lights;
     std::vector<std::shared_ptr<Shape>> shapes;
     std::unordered_map<std::string, std::shared_ptr<QOpenGLShaderProgram>> shaders;

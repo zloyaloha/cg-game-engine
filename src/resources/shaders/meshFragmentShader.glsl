@@ -70,7 +70,7 @@ vec3 pointLightLighting(PointLight light, vec3 fragPos, vec3 norm, vec3 texColor
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);  // Угол между отраженным светом и направлением камеры
     vec3 specular = spec * material.specularColor * light.lightColor * light.intensity;
 
-    float attenuation = 1.0 / (light.constant * distance * (distance * distance));
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 
     return (ambient + diffuse + specular) * attenuation;
 }

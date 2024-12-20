@@ -12,6 +12,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "light.h"
+#include "aabb.h"
+
 
 struct Material {
     glm::vec3 ambientColor;
@@ -44,18 +46,27 @@ class Shape {
         void setScale(const glm::vec3& scale);
         void setRotation(const glm::vec3& rotation);
         void setPosition(const glm::vec3 &newPosition);
+        void setVelocity(const glm::vec3& velocity);
+        void setAcceleration(const glm::vec3 &acceleration);
 
         void updateModelMatrix();
         glm::vec3 getScale() const;
         glm::vec3 getRotation() const;
         glm::vec3 getPosition() const;
-        
+        glm::vec3 getVelocity() const;
+        glm::vec3 getAcceleration() const;
+        std::shared_ptr<AABB> getAABB() const;
+
         void loadMatriciesToShader();
         void loadLightsToShader();
         void loadMaterialToShader();
 
         void setLights(const std::vector<std::shared_ptr<Light>>& light);
         std::string getType() const;
+
+        void update(float deltaTime);
+        void initAABB();
+        bool calculateIntersect(std::shared_ptr<Shape> other) const;
     protected:
         std::vector<std::shared_ptr<Light>> lights;
         std::shared_ptr<Material> material;
@@ -78,9 +89,15 @@ class Shape {
         QOpenGLBuffer indexBuffer{QOpenGLBuffer::IndexBuffer};
 
         GLuint pos;
-        GLuint normal;
+        GLuint _normal;
 
         std::vector<glm::vec3> vertices;
         std::vector<glm::vec3> normals;
         std::vector<unsigned int> indices;
+
+        std::shared_ptr<AABB> _aabb;
+    protected:
+        glm::vec3 _velocity;
+        glm::vec3 _acceleration;
+        glm::vec3 _initialPosition;
 };
