@@ -69,7 +69,7 @@ class Shape : public std::enable_shared_from_this<Shape> {
 
         glm::vec3 getAmbientColor();
         glm::vec3 getDiffuseColor();
-        glm::vec3 getSpecularColor(); 
+        glm::vec3 getSpecularColor();
         float getShininess();
 
         glm::vec3 getInitialPosition() const;
@@ -91,8 +91,6 @@ class Shape : public std::enable_shared_from_this<Shape> {
         void loadMaterialToShader();
 
         void setLights(const std::vector<std::shared_ptr<Light>>& light);
-
-        std::string getType() const;
 
         void update(float deltaTime);
         void initAABB();

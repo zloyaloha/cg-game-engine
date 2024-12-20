@@ -148,6 +148,7 @@ glm::vec3 Shape::getSpecularColor()
 float Shape::getShininess()
 {
     return this->material->shininess;
+}
 
 glm::vec3 Shape::getInitialPosition() const
 {

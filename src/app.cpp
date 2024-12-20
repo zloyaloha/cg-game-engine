@@ -22,12 +22,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     openglWidget = new OpenGLWidget(ui->openGLWidget);
     openglWidget->resize(920, 512);
-}
 
-void MainWindow::addCubeButtonClicked()
-{   
-    std::string name = "cube" + std::to_string(i);
-    addItemToList(i, name);
     fpsUpdateTimer = std::make_shared<QTimer>(this);
     connect(fpsUpdateTimer.get(), &QTimer::timeout, this, &MainWindow::displayFPS);
     fpsUpdateTimer->start(1000);  // Обновление FPS каждую секунду
@@ -36,17 +31,17 @@ void MainWindow::addCubeButtonClicked()
 void MainWindow::addCubeButtonClicked()
 {
     std::shared_ptr<Cube> cube = std::make_shared<Cube>(1.0f, glm::vec3(0.0f, 0.0f, 1.0f + i));
-    
     std::shared_ptr<Material> material = std::make_shared<Material>();
     material->ambientColor = glm::vec3(1, 1, 1);
     material->diffuseColor = glm::vec3(0.4f, 0.4f, 0.4f);
     material->specularColor = glm::vec3(0.7f, 0.7f, 0.7f);
     material->shininess = 10.0f;
-
     cube->setPosition(glm::vec3(0, 0, 0));
     cube->setRotation(glm::vec3(0, 0, 0));
     cube->setScale(glm::vec3(1, 1, 1));
     cube->setMaterial(material);
+    std::string name = "cube" + std::to_string(i);
+    addItemToList(i, name);
     openglWidget->addShape(cube);
     i += 1;
 }
@@ -54,7 +49,7 @@ void MainWindow::addCubeButtonClicked()
 std::string MainWindow::getPenultimateWord(const QString& qstringPath) {
     // Преобразуем QString в std::string
     std::string path = qstringPath.toStdString();
-    
+
     // Разделяем строку по "/"
     std::vector<std::string> parts;
     std::stringstream ss(path);
