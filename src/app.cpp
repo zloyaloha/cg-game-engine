@@ -80,18 +80,27 @@ void MainWindow::addMeshButtonClicked()
         return;
     }
 
+    
+    std::vector<std::shared_ptr<Mesh>> groupMeshes;
+    
+
     if (QFile::exists(filePath)) {
         qDebug() << "Load mesh from " << filePath;
         std::string name = getPenultimateWord(filePath);
         ObjLoader loader;
         std::vector<std::shared_ptr<Mesh>> meshes = loader.load(filePath.toStdString());
+        // std::unordered_map<int, std::vector<std::shared_ptr<Mesh>>> objectGroups;
         for (const auto mesh: meshes) {
             openglWidget->addShape(mesh);
             mesh->setPosition(glm::vec3(0, 0, 0));
             mesh->setRotation(glm::vec3(0, 0, 0));
             mesh->setScale(glm::vec3(1, 1, 1));
-            addItemToList(i, name);
+            // addItemToList(i, name);
+            groupMeshes.push_back(mesh);
         }
+        objectGroups[groupId] = groupMeshes; // Сохраняем группу
+        addItemToList(groupId, name);       // Привязываем группу к списку
+        groupId++;
         qDebug() << "Add" << meshes.size() << "meshes!";
     }
     
@@ -167,19 +176,33 @@ void MainWindow::onObjectSelected(QListWidgetItem *item)
         dialog.exec();
 
         if (dialog.clickedButton() == settingsButton) {
-            showObjectSettings(selectedShape);
+            showObjectSettings(selectedShape, id);
         } else if (dialog.clickedButton() == deleteButton) {
-            openglWidget->eraseShape(selectedShape);
-            int row = ui->listWidget->row(item);
-            ui->listWidget->takeItem(row);
-            delete item; 
-            i -= 1;
+            if (!type.startsWith("cube")) {
+                for (auto mesh: objectGroups[id]) {
+                    openglWidget->eraseShape(mesh);
+                    // std::cout << "Deleted mesh" << std::endl;
+                }
+                int row = ui->listWidget->row(item);
+                ui->listWidget->takeItem(row);
+                delete item;
+                objectGroups.erase(id);
+                groupId -= 1;
+            } else {
+                openglWidget->eraseShape(selectedShape);
+                int row = ui->listWidget->row(item);
+                ui->listWidget->takeItem(row);
+                delete item; 
+                i -= 1;
+            }
+            
+        
         }
     }
 }
 
 
-void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
+void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
 {
     QDialog settingsDialog;
     settingsDialog.setWindowTitle("Настройки объекта");
@@ -190,6 +213,7 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
     // Раздел для позиции
     QGroupBox *positionGroup = new QGroupBox("Позиция");
     QFormLayout *positionLayout = new QFormLayout;
+
     glm::vec3 position = shape->getPosition();
     QLineEdit *positionX = new QLineEdit(QString::number(position.x));
     QLineEdit *positionY = new QLineEdit(QString::number(position.y));
@@ -402,7 +426,15 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
     // Кнопка сохранения
     QPushButton *saveButton = new QPushButton("Сохранить");
     connect(saveButton, &QPushButton::clicked, [&]() {
-        shape->setPosition(glm::vec3(positionX->text().toFloat(), positionY->text().toFloat(), positionZ->text().toFloat()));
+         if (shape->getType() == "mesh") {
+            for (auto& mesh: objectGroups[groupId]) {
+                glm::vec3 mesh_pos = mesh->getPosition();
+                mesh->setPosition(glm::vec3(mesh_pos.x + positionX->text().toFloat(), mesh_pos.y + positionY->text().toFloat(), mesh_pos.z + positionZ->text().toFloat()));
+            }
+        } else {
+            shape->setPosition(glm::vec3(positionX->text().toFloat(), positionY->text().toFloat(), positionZ->text().toFloat()));
+        }
+        
         shape->setAmbientColor(glm::vec3(colorAXSlider->value() / 255.0f, colorAYSlider->value() / 255.0f, colorAZSlider->value() / 255.0f));
         shape->setDiffuseColor(glm::vec3(colorDXSlider->value() / 255.0f, colorDYSlider->value() / 255.0f, colorDZSlider->value() / 255.0f));
         shape->setSpecularColor(glm::vec3(colorSXSlider->value() / 255.0f, colorSYSlider->value() / 255.0f, colorSZSlider->value() / 255.0f));
