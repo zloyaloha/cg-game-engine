@@ -6,17 +6,17 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1096</width>
-    <height>772</height>
+    <width>1333</width>
+    <height>735</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QHBoxLayout" name="horizontalLayout_5">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
@@ -94,16 +94,11 @@
          <attribute name="title">
           <string>Tab 1</string>
          </attribute>
-         <widget class="QListWidget" name="listWidget">
-          <property name="geometry">
-           <rect>
-            <x>-5</x>
-            <y>10</y>
-            <width>261</width>
-            <height>281</height>
-           </rect>
-          </property>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QListWidget" name="listWidget"/>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="tab_2">
          <attribute name="title">
@@ -131,8 +126,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1096</width>
-     <height>23</height>
+     <width>1333</width>
+     <height>20</height>
     </rect>
    </property>
   </widget>

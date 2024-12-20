@@ -24,6 +24,7 @@ set(WINDOWS_SRC
     src/app.cpp
     src/opengl_win.cpp
     src/camera.cpp
+    src/physics.cpp
 )
 
 set(SHAPES_SRC
@@ -32,6 +33,7 @@ set(SHAPES_SRC
     src/shapes/mesh.cpp
     src/shapes/obj_loader.cpp
     src/shapes/light.cpp
+    src/shapes/aabb.cpp
 )
 
 set(RESOURCES

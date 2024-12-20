@@ -5,60 +5,58 @@
 Mesh::Mesh(const glm::vec3 &position) : Shape(position, "mesh") {}
 
 void Mesh::initialize() {
-    if (!vao.isCreated()) {
-        vao.create();
-    }
-    vao.bind();
-
     shaderProgram->bind();
+    _vao->bind();
     pos = shaderProgram->attributeLocation("aPos");
-    normal = shaderProgram->attributeLocation("aNormal");
+    _normal = shaderProgram->attributeLocation("aNormal");
     tex = shaderProgram->attributeLocation("aTexCoord");
 
     textureBuffer.create();
     textureBuffer.bind();
     textureBuffer.allocate(&texCoords[0], texCoords.size() * sizeof(glm::vec2));
-    textureBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-    shaderProgram->enableAttributeArray(tex);
+    textureBuffer.setUsagePattern(QOpenGLBuffer::StreamDraw);
     shaderProgram->setAttributeBuffer(tex, GL_FLOAT, 0, 2);
+    shaderProgram->enableAttributeArray(tex);
 
     normalBuffer.create();
     normalBuffer.bind();
     normalBuffer.allocate(&normals[0], normals.size() * sizeof(glm::vec3));
-    normalBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-    shaderProgram->enableAttributeArray(normal);
-    shaderProgram->setAttributeBuffer(normal, GL_FLOAT, 0, 3);
+    normalBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    shaderProgram->setAttributeBuffer(_normal, GL_FLOAT, 0, 3);
+    shaderProgram->enableAttributeArray(_normal);
 
     vertexBuffer.create();
     vertexBuffer.bind();
     vertexBuffer.allocate(&vertices[0], vertices.size() * sizeof(glm::vec3));
-    vertexBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-    shaderProgram->enableAttributeArray(pos);
+    vertexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
     shaderProgram->setAttributeBuffer(pos, GL_FLOAT, 0, 3);
+    shaderProgram->enableAttributeArray(pos);
 
     indexBuffer.create();
     indexBuffer.bind();
     indexBuffer.allocate(&indices[0], indices.size() * sizeof(unsigned int));
-    indexBuffer.setUsagePattern(QOpenGLBuffer::DynamicDraw);
-    vao.release();
+    indexBuffer.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    _vao->release();
 }
 
 void Mesh::draw() {
-    // std::shared_ptr<Material> material = std::make_shared<Material>();
-    // material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
-    // material->diffuseColor = glm::vec3(0.6f, 0.6f, 0.6f);  // Тусклый диффузный цвет
-    // material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Нет зеркальных отражений (матовый)
-    // material->shininess = 10.0f;  // Шершавость поверхности, меньше — более матовая
     this->setMaterial(material);
-    if (!shaderProgram->bind()) {
-        qDebug() << "Failed to bind shader program.";
-        return;
-    }
-    vao.bind();
-    indexBuffer.bind();
-    normalBuffer.bind();
-    textureBuffer.bind();
+    shaderProgram->bind();
+    _vao->bind();
+
     vertexBuffer.bind();
+    shaderProgram->setAttributeBuffer(pos, GL_FLOAT, 0, 3);
+    shaderProgram->enableAttributeArray(pos);
+
+    normalBuffer.bind();
+    shaderProgram->setAttributeBuffer(_normal, GL_FLOAT, 0, 3);
+    shaderProgram->enableAttributeArray(_normal);
+
+    textureBuffer.bind();
+    shaderProgram->setAttributeBuffer(tex, GL_FLOAT, 0, 2);
+    shaderProgram->enableAttributeArray(tex);
+
+    indexBuffer.bind();
 
     loadMatriciesToShader();
     loadLightsToShader();
@@ -66,11 +64,7 @@ void Mesh::draw() {
     loadTextureToShader();
 
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
-    vao.release();
-    indexBuffer.release();
-    normalBuffer.release();
-    textureBuffer.release();
-    vertexBuffer.release();
+    _vao->release();
     shaderProgram->release();
 }
 

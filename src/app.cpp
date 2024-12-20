@@ -13,12 +13,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->addCube, &QPushButton::clicked, this, &MainWindow::addCubeButtonClicked);
     connect(ui->addLight, &QPushButton::clicked, this, &MainWindow::addLightButtonClicked);
     connect(ui->addMesh, &QPushButton::clicked, this, &MainWindow::addMeshButtonClicked);
-    
+    connect(ui->changeProjection, &QPushButton::clicked, this, &MainWindow::changeProjectionButtonClicked);
+    connect(ui->startScene, &QPushButton::clicked, this, &MainWindow::startScene);
+    connect(ui->restorePosition, &QPushButton::clicked, this, &MainWindow::restorePosition);
+    connect(ui->listWidget, &QListWidget::itemClicked, this, &MainWindow::onObjectSelected);
     setWindowTitle("Игры Разума");
     setGeometry(400, 200, 1280, 720);
 
     openglWidget = new OpenGLWidget(ui->openGLWidget);
     openglWidget->resize(920, 512);
+
 
     connect(ui->listWidget, &QListWidget::itemClicked, this, &MainWindow::onObjectSelected);
 
@@ -28,6 +32,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->addDirectionalLight, &QPushButton::clicked, this, &MainWindow::addDirectionalLightButtonClicked);
 
     connect(ui->lightSources, &QListWidget::itemClicked, this, &MainWindow::onLightSourceSelected);
+    fpsUpdateTimer = std::make_shared<QTimer>(this);
+    connect(fpsUpdateTimer.get(), &QTimer::timeout, this, &MainWindow::displayFPS);
+    fpsUpdateTimer->start(1000);
 }
 
 void MainWindow::addItemToLightList(int i, const std::string& light_type)
@@ -314,44 +321,47 @@ void MainWindow::showDirectionalLightSourceSettings(std::shared_ptr<Light> direc
 }
 
 void MainWindow::addCubeButtonClicked()
-{   
-    addItemToList(i, "cube");
+{
     std::shared_ptr<Cube> cube = std::make_shared<Cube>(1.0f, glm::vec3(0.0f, 0.0f, 1.0f + i));
-    
     std::shared_ptr<Material> material = std::make_shared<Material>();
-    material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
-    material->diffuseColor = glm::vec3(0.6f, 0.6f, 0.6f);  // Тусклый диффузный цвет
-    material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Нет зеркальных отражений (матовый)
-    material->shininess = 10.0f;  // Шершавость поверхности, меньше — более матовая
-
-    // material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
-    // material->diffuseColor = glm::vec3(0.8f, 0.8f, 0.8f);  // Яркий диффузный цвет
-    // material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Полностью зеркальные отражения (металлический эффект)
-    // material->shininess = 1.0f;  // Высокая шершавость (показывает более четкие отражения)
-
-    // material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
-    // material->diffuseColor = glm::vec3(0.5f, 0.5f, 0.5f);  // Средний диффузный цвет
-    // material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Яркие зеркальные отражения
-    // material->shininess = 50.0f;  // Средняя шершавость (для пластика)
-
-    // material->ambientColor = glm::vec3(0.2f, 0.1f, 0.05f);  // Темный амбиентный цвет, под дерево
-    // material->diffuseColor = glm::vec3(0.6f, 0.3f, 0.1f);  // Теплый диффузный цвет (деревянный оттенок)
-    // material->specularColor = glm::vec3(0.2f, 0.1f, 0.05f);  // Слабые зеркальные отражения
-    // material->shininess = 30.0f;  // Меньше шершавости, типично для деревянных поверхностей
-
-    // material->ambientColor = glm::vec3(0.24725f, 0.1995f, 0.0745f);  // Тусклый амбиентный цвет, похожий на золото
-    // material->diffuseColor = glm::vec3(0.75164f, 0.60648f, 0.22648f);  // Диффузный цвет золота
-    // material->specularColor = glm::vec3(0.628281f, 0.555802f, 0.366065f);  // Зеркальные отражения для золота
-    // material->shininess = 51.2f;  // Средняя шершавость, для блеска золота
-
+    material->ambientColor = glm::vec3(1, 1, 1);
+    material->diffuseColor = glm::vec3(0.4f, 0.4f, 0.4f);
+    material->specularColor = glm::vec3(0.7f, 0.7f, 0.7f);
+    material->shininess = 10.0f;
     cube->setPosition(glm::vec3(0, 0, 0));
     cube->setRotation(glm::vec3(0, 0, 0));
     cube->setScale(glm::vec3(1, 1, 1));
     cube->setMaterial(material);
+    std::string name = "cube" + std::to_string(i);
+    addItemToList(i, name);
     openglWidget->addShape(cube);
-   
     i += 1;
+}
 
+std::string MainWindow::getPenultimateWord(const QString& qstringPath) {
+    // Преобразуем QString в std::string
+    std::string path = qstringPath.toStdString();
+
+    // Разделяем строку по "/"
+    std::vector<std::string> parts;
+    std::stringstream ss(path);
+    std::string segment;
+    while (std::getline(ss, segment, '/')) {
+        parts.push_back(segment);
+    }
+
+    // Проверяем, есть ли достаточно частей
+    if (parts.size() < 2) {
+        return ""; // Возвращаем пустую строку, если частей недостаточно
+    }
+
+    // Возвращаем предпоследнюю часть
+    return parts[parts.size() - 2];
+}
+
+void MainWindow::displayFPS()
+{
+    ui->fps->display(openglWidget->getFPS());
 }
 
 void MainWindow::addMeshButtonClicked()
@@ -362,28 +372,51 @@ void MainWindow::addMeshButtonClicked()
         return;
     }
 
+    
+    std::vector<std::shared_ptr<Mesh>> groupMeshes;
+    
+
     if (QFile::exists(filePath)) {
         qDebug() << "Load mesh from " << filePath;
+        std::string name = getPenultimateWord(filePath);
         ObjLoader loader;
         std::vector<std::shared_ptr<Mesh>> meshes = loader.load(filePath.toStdString());
+        // std::unordered_map<int, std::vector<std::shared_ptr<Mesh>>> objectGroups;
         for (const auto mesh: meshes) {
             openglWidget->addShape(mesh);
             mesh->setPosition(glm::vec3(0, 0, 0));
             mesh->setRotation(glm::vec3(0, 0, 0));
             mesh->setScale(glm::vec3(1, 1, 1));
-            addItemToList(i, "mesh");
-
+            // addItemToList(i, name);
+            groupMeshes.push_back(mesh);
         }
+        objectGroups[groupId] = groupMeshes; // Сохраняем группу
+        addItemToList(groupId, name);       // Привязываем группу к списку
+        groupId++;
         qDebug() << "Add" << meshes.size() << "meshes!";
     }
-    
 }
 
-void MainWindow::addLightButtonClicked() 
+void MainWindow::changeProjectionButtonClicked()
+{
+    openglWidget->changeCameraProjection();
+}
+
+void MainWindow::startScene()
+{
+    openglWidget->startScene();
+}
+
+void MainWindow::restorePosition()
+{
+    openglWidget->restorePosition();
+}
+
+void MainWindow::addLightButtonClicked()
 {
     qDebug() << "Add light!";
     std::shared_ptr<Light> pointLight = std::make_shared<PointLight>(
-        glm::vec3(-10.0f, -10.0f, -10.0f)     // Позиция источника света
+        glm::vec3(-3.0f, -3.0f, -3.0f)     // Позиция источника света
     );
 
     std::shared_ptr<Light> spotLight = std::make_shared<SpotLight>(
@@ -392,65 +425,86 @@ void MainWindow::addLightButtonClicked()
     );
 
     std::shared_ptr<Light> dirLight = std::make_shared<DirectionalLight>(
-        glm::vec3(0.0f, -1.0f, 0.0f)      // Направление света (например, вниз)
+        glm::vec3(-1.0f, -1.0f, -1.0f)      // Направление света (например, вниз)
     );
-    openglWidget->addLight(spotLight);
+    openglWidget->addLight(pointLight);
     // openglWidget->addLight(spotLight);
-    // openglWidget->addLight(dirLight);
+    // openglWidget->addLight(spotLight);
+    // openglWidget->addLight(spotLight);
 }
 
 void MainWindow::addItemToList(int i, const std::string& type)
-{
-    // Создаем новый элемент списка
+{   
     QListWidgetItem* newItem = new QListWidgetItem(QString::fromStdString(type), ui->listWidget);
     
-    // Привязываем числовое значение к элементу
-    newItem->setData(Qt::UserRole, i);  // Qt::UserRole можно использовать для хранения целых значений
+    newItem->setData(Qt::UserRole, i);
 
-    // Можно также привязать тип (строку) как дополнительные данные
     newItem->setData(Qt::UserRole + 1, QString::fromStdString(type));
 
-    // Добавляем элемент в список
     ui->listWidget->addItem(newItem);
 }
 
 void MainWindow::onObjectSelected(QListWidgetItem *item)
 {
-    // Извлекаем числовое значение (например, ID)
     int id = item->data(Qt::UserRole).toInt();
 
-    // Извлекаем строку с типом
     QString type = item->data(Qt::UserRole + 1).toString();
 
-    // Выводим данные для проверки
     qDebug() << "Selected Item ID: " << id;
     qDebug() << "Item Type: " << type;
 
-    // Например, если у вас есть указатель на объект Shape, привязанный к этим данным
-    // Получаем объект Shape, например, из списка или другой структуры данных
     std::shared_ptr<Shape> selectedShape;
     selectedShape = openglWidget->getAllShapes()[id];
     if (selectedShape) {
-        showObjectSettings(selectedShape);
+        QMessageBox dialog;
+        dialog.setWindowTitle("Действия с объектом");
+        dialog.setText("Выберите действие для объекта:");
+
+        QPushButton *settingsButton = dialog.addButton("Настройки", QMessageBox::ActionRole);
+        
+        QPushButton *deleteButton = dialog.addButton("Удалить", QMessageBox::ActionRole);
+        
+        dialog.exec();
+
+        if (dialog.clickedButton() == settingsButton) {
+            showObjectSettings(selectedShape, id);
+        } else if (dialog.clickedButton() == deleteButton) {
+            if (!type.startsWith("cube")) {
+                for (auto mesh: objectGroups[id]) {
+                    openglWidget->eraseShape(mesh);
+                    // std::cout << "Deleted mesh" << std::endl;
+                }
+                int row = ui->listWidget->row(item);
+                ui->listWidget->takeItem(row);
+                delete item;
+                objectGroups.erase(id);
+                groupId -= 1;
+            } else {
+                openglWidget->eraseShape(selectedShape);
+                int row = ui->listWidget->row(item);
+                ui->listWidget->takeItem(row);
+                delete item; 
+                i -= 1;
+            }
+            
+        
+        }
     }
 }
 
 
-void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
+void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
 {
     QDialog settingsDialog;
     settingsDialog.setWindowTitle("Настройки объекта");
     settingsDialog.resize(400, 600);
 
-
-
-    // // Компоновка
     QVBoxLayout *layout = new QVBoxLayout();
-    
 
     // Раздел для позиции
     QGroupBox *positionGroup = new QGroupBox("Позиция");
     QFormLayout *positionLayout = new QFormLayout;
+
     glm::vec3 position = shape->getPosition();
     QLineEdit *positionX = new QLineEdit(QString::number(position.x));
     QLineEdit *positionY = new QLineEdit(QString::number(position.y));
@@ -461,6 +515,48 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
     positionLayout->addRow("z:", positionZ);
     positionGroup->setLayout(positionLayout);
     layout->addWidget(positionGroup);
+
+    // Раздел для Rotation
+    QGroupBox *rotationGroup = new QGroupBox("Rotation");
+    QFormLayout *rotationLayout = new QFormLayout;
+    glm::vec3 rotation = shape->getRotation();
+
+    QLabel *rotXlabel = new QLabel("x:", &settingsDialog);
+    QSlider *rotXSlider = new QSlider(Qt::Horizontal, &settingsDialog);
+    rotXSlider->setRange(0, 359);
+    rotXSlider->setValue(static_cast<int>(rotation.x * 359)); // Значение от 0 до 255
+    QLabel *rotXvalue = new QLabel(QString::number(rotation.x), &settingsDialog);
+    connect(rotXSlider, &QSlider::valueChanged, [rotXvalue](int value) {
+        rotXvalue->setText(QString::number(value / 359.0f, 'f', 2)); // Отображаем значение от 0 до 1
+    });
+
+    QLabel *rotYlabel = new QLabel("y:", &settingsDialog);
+    QSlider *rotYSlider = new QSlider(Qt::Horizontal, &settingsDialog);
+    rotYSlider->setRange(0, 359);
+    rotYSlider->setValue(static_cast<int>(rotation.y * 359)); // Значение от 0 до 255
+    QLabel *rotYvalue = new QLabel(QString::number(rotation.y), &settingsDialog);
+    connect(rotYSlider, &QSlider::valueChanged, [rotYvalue](int value) {
+        rotYvalue->setText(QString::number(value / 359.0f, 'f', 2)); // Отображаем значение от 0 до 1
+    });
+
+    QLabel *rotZlabel = new QLabel("z:", &settingsDialog);
+    QSlider *rotZSlider = new QSlider(Qt::Horizontal, &settingsDialog);
+    rotZSlider->setRange(0, 359);
+    rotZSlider->setValue(static_cast<int>(rotation.z * 359)); // Значение от 0 до 255
+    QLabel *rotZvalue = new QLabel(QString::number(rotation.z), &settingsDialog);
+    connect(rotZSlider, &QSlider::valueChanged, [rotZvalue](int value) {
+        rotZvalue->setText(QString::number(value / 359.0f, 'f', 2)); // Отображаем значение от 0 до 1
+    });
+
+    // Добавление компонентов в layout
+    rotationLayout->addRow(rotXlabel, rotXSlider);
+    rotationLayout->addRow("", rotXvalue); // Значение для r
+    rotationLayout->addRow(rotYlabel, rotYSlider);
+    rotationLayout->addRow("", rotYvalue); // Значение для g
+    rotationLayout->addRow(rotZlabel, rotZSlider);
+    rotationLayout->addRow("", rotZvalue); // Значение для b
+    rotationGroup->setLayout(rotationLayout);
+    layout->addWidget(rotationGroup);
 
     // Раздел для AmbientColor
     QGroupBox *ambientColorGroup = new QGroupBox("AmbientColor");
@@ -552,10 +648,6 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
     diffuseColorGroup->setLayout(diffuseColorLayout);
     layout->addWidget(diffuseColorGroup);
 
-
-
-
-
     // Раздел для SpecularColor
     QGroupBox *specularColorGroup = new QGroupBox("SpecularColor");
     QFormLayout *specularColorLayout = new QFormLayout;
@@ -622,56 +714,18 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
     scaleGroup->setLayout(scaleLayout);
     layout->addWidget(scaleGroup);
 
-
-    // Раздел для Rotation
-    QGroupBox *rotationGroup = new QGroupBox("Rotation");
-    QFormLayout *rotationLayout = new QFormLayout;
-    glm::vec3 rotation = shape->getRotation();
-
-    QLabel *rotXlabel = new QLabel("x:", &settingsDialog);
-    QSlider *rotXSlider = new QSlider(Qt::Horizontal, &settingsDialog);
-    rotXSlider->setRange(0, 359);
-    rotXSlider->setValue(static_cast<int>(rotation.x * 359)); // Значение от 0 до 255
-    QLabel *rotXvalue = new QLabel(QString::number(rotation.x), &settingsDialog);
-    connect(rotXSlider, &QSlider::valueChanged, [rotXvalue](int value) {
-        rotXvalue->setText(QString::number(value / 359.0f, 'f', 2)); // Отображаем значение от 0 до 1
-    });
-
-    QLabel *rotYlabel = new QLabel("y:", &settingsDialog);
-    QSlider *rotYSlider = new QSlider(Qt::Horizontal, &settingsDialog);
-    rotYSlider->setRange(0, 359);
-    rotYSlider->setValue(static_cast<int>(rotation.y * 359)); // Значение от 0 до 255
-    QLabel *rotYvalue = new QLabel(QString::number(rotation.y), &settingsDialog);
-    connect(rotYSlider, &QSlider::valueChanged, [rotYvalue](int value) {
-        rotYvalue->setText(QString::number(value / 359.0f, 'f', 2)); // Отображаем значение от 0 до 1
-    });
-
-    QLabel *rotZlabel = new QLabel("z:", &settingsDialog);
-    QSlider *rotZSlider = new QSlider(Qt::Horizontal, &settingsDialog);
-    rotZSlider->setRange(0, 359);
-    rotZSlider->setValue(static_cast<int>(rotation.z * 359)); // Значение от 0 до 255
-    QLabel *rotZvalue = new QLabel(QString::number(rotation.z), &settingsDialog);
-    connect(rotZSlider, &QSlider::valueChanged, [rotZvalue](int value) {
-        rotZvalue->setText(QString::number(value / 359.0f, 'f', 2)); // Отображаем значение от 0 до 1
-    });
-
-    // Добавление компонентов в layout
-    rotationLayout->addRow(rotXlabel, rotXSlider);
-    rotationLayout->addRow("", rotXvalue); // Значение для r
-    rotationLayout->addRow(rotYlabel, rotYSlider);
-    rotationLayout->addRow("", rotYvalue); // Значение для g
-    rotationLayout->addRow(rotZlabel, rotZSlider);
-    rotationLayout->addRow("", rotZvalue); // Значение для b
-    rotationGroup->setLayout(rotationLayout);
-    layout->addWidget(rotationGroup);
-
-
-    
-
     // Кнопка сохранения
     QPushButton *saveButton = new QPushButton("Сохранить");
     connect(saveButton, &QPushButton::clicked, [&]() {
-        shape->setPosition(glm::vec3(positionX->text().toFloat(), positionY->text().toFloat(), positionZ->text().toFloat()));
+         if (shape->getType() == "mesh") {
+            for (auto& mesh: objectGroups[groupId]) {
+                glm::vec3 mesh_pos = mesh->getPosition();
+                mesh->setPosition(glm::vec3(mesh_pos.x + positionX->text().toFloat(), mesh_pos.y + positionY->text().toFloat(), mesh_pos.z + positionZ->text().toFloat()));
+            }
+        } else {
+            shape->setPosition(glm::vec3(positionX->text().toFloat(), positionY->text().toFloat(), positionZ->text().toFloat()));
+        }
+        
         shape->setAmbientColor(glm::vec3(colorAXSlider->value() / 255.0f, colorAYSlider->value() / 255.0f, colorAZSlider->value() / 255.0f));
         shape->setDiffuseColor(glm::vec3(colorDXSlider->value() / 255.0f, colorDYSlider->value() / 255.0f, colorDZSlider->value() / 255.0f));
         shape->setSpecularColor(glm::vec3(colorSXSlider->value() / 255.0f, colorSYSlider->value() / 255.0f, colorSZSlider->value() / 255.0f));
@@ -687,7 +741,7 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
     settingsDialog.exec();
 }
 
-MainWindow::~MainWindow() 
+MainWindow::~MainWindow()
 {
     delete ui;
 }

@@ -31,7 +31,6 @@ public:
 
     void addItemToList(int i, const std::string& type);
     void onObjectSelected(QListWidgetItem *item);
-    void showObjectSettings(std::shared_ptr<Shape> shape);
 
     void addItemToLightList(int i, const std::string& light_type);
     void onLightSourceSelected(QListWidgetItem *light_source);
@@ -39,7 +38,11 @@ public:
     void showSpotLightSourceSettings(std::shared_ptr<Light> spot_light_source);
     void showDirectionalLightSourceSettings(std::shared_ptr<Light> directional_light_source);
 
+    void showObjectSettings(std::shared_ptr<Shape> shape, int groupId);
+
     ~MainWindow();
+private:
+    std::string getPenultimateWord(const QString& qstringPath);
 public slots:
     void addLightButtonClicked();
     void addCubeButtonClicked();
@@ -49,9 +52,18 @@ public slots:
     void addSpotLightButtonClicked();
     void addDirectionalLightButtonClicked();
 
+    void changeProjectionButtonClicked();
+    void restorePosition();
+    void startScene();
+
 private:
+    void displayFPS();
+
+    std::shared_ptr<QTimer> fpsUpdateTimer;
     int i{0};
     Ui::MainWindow* ui;
     OpenGLWidget* openglWidget;
     QStringListModel* listModel;
+    std::unordered_map<int, std::vector<std::shared_ptr<Mesh>>> objectGroups;
+    int groupId{0};
 };
