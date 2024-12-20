@@ -19,7 +19,7 @@ void Physics::resolveCollision(std::shared_ptr<Shape> shape1, std::shared_ptr<Sh
     std::shared_ptr<AABB> aAABB = shape1->getAABB();
     std::shared_ptr<AABB> bAABB = shape2->getAABB();
 
-    const float epsilon = 1e-2f;
+    const float epsilon = 0.1;
 
     glm::vec3 overlap(
         std::min(aAABB->getMax().x - bAABB->getMin().x, bAABB->getMax().x - aAABB->getMin().x),

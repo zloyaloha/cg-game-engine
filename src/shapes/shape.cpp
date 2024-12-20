@@ -72,6 +72,9 @@ void Shape::changeGhostRegime()
 
 void Shape::update(float deltaTime)
 {
+    if (deltaTime < 0) {
+        deltaTime = 0.008;
+    }
     _velocity += _acceleration * deltaTime;
     setPosition(_position + _velocity * deltaTime);
 

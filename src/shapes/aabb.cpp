@@ -26,19 +26,14 @@ bool AABB::intersect(const AABB& other)
 
 void AABB::translateAABB(const glm::vec3& translation)
 {
-    min += translation; 
+    min += translation;
     max += translation;
 }
 
 void AABB::scaleAABB(const glm::vec3& scale)
 {
-    glm::vec3 center = (min + max) / 2.0f;
-    glm::vec3 halfSize = (max - min) / 2.0f;
-
-    halfSize *= scale;
-
-    min = center - halfSize;
-    max = center + halfSize;
+    min = min * scale;
+    max = max * scale;
 }
 
 void AABB::rotateAABB(const glm::vec3& rotation)

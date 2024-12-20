@@ -103,7 +103,6 @@ void MainWindow::addMeshButtonClicked()
         groupId++;
         qDebug() << "Add" << meshes.size() << "meshes!";
     }
-    
 }
 
 void MainWindow::changeProjectionButtonClicked()
