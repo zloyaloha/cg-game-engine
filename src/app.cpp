@@ -13,56 +13,42 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->addCube, &QPushButton::clicked, this, &MainWindow::addCubeButtonClicked);
     connect(ui->addLight, &QPushButton::clicked, this, &MainWindow::addLightButtonClicked);
     connect(ui->addMesh, &QPushButton::clicked, this, &MainWindow::addMeshButtonClicked);
-    
+    connect(ui->changeProjection, &QPushButton::clicked, this, &MainWindow::changeProjectionButtonClicked);
+    connect(ui->startScene, &QPushButton::clicked, this, &MainWindow::startScene);
+    connect(ui->restorePosition, &QPushButton::clicked, this, &MainWindow::restorePosition);
+    connect(ui->listWidget, &QListWidget::itemClicked, this, &MainWindow::onObjectSelected);
     setWindowTitle("Игры Разума");
     setGeometry(400, 200, 1280, 720);
 
     openglWidget = new OpenGLWidget(ui->openGLWidget);
     openglWidget->resize(920, 512);
-
-    connect(ui->listWidget, &QListWidget::itemClicked, this, &MainWindow::onObjectSelected);
 }
 
 void MainWindow::addCubeButtonClicked()
 {   
     std::string name = "cube" + std::to_string(i);
     addItemToList(i, name);
+    fpsUpdateTimer = std::make_shared<QTimer>(this);
+    connect(fpsUpdateTimer.get(), &QTimer::timeout, this, &MainWindow::displayFPS);
+    fpsUpdateTimer->start(1000);  // Обновление FPS каждую секунду
+}
+
+void MainWindow::addCubeButtonClicked()
+{
     std::shared_ptr<Cube> cube = std::make_shared<Cube>(1.0f, glm::vec3(0.0f, 0.0f, 1.0f + i));
     
     std::shared_ptr<Material> material = std::make_shared<Material>();
-    material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
-    material->diffuseColor = glm::vec3(0.6f, 0.6f, 0.6f);  // Тусклый диффузный цвет
-    material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Нет зеркальных отражений (матовый)
-    material->shininess = 10.0f;  // Шершавость поверхности, меньше — более матовая
-
-    // material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
-    // material->diffuseColor = glm::vec3(0.8f, 0.8f, 0.8f);  // Яркий диффузный цвет
-    // material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Полностью зеркальные отражения (металлический эффект)
-    // material->shininess = 1.0f;  // Высокая шершавость (показывает более четкие отражения)
-
-    // material->ambientColor = glm::vec3(0.1f, 0.1f, 0.1f);  // Тусклый амбиентный цвет
-    // material->diffuseColor = glm::vec3(0.5f, 0.5f, 0.5f);  // Средний диффузный цвет
-    // material->specularColor = glm::vec3(1.0f, 1.0f, 1.0f);  // Яркие зеркальные отражения
-    // material->shininess = 50.0f;  // Средняя шершавость (для пластика)
-
-    // material->ambientColor = glm::vec3(0.2f, 0.1f, 0.05f);  // Темный амбиентный цвет, под дерево
-    // material->diffuseColor = glm::vec3(0.6f, 0.3f, 0.1f);  // Теплый диффузный цвет (деревянный оттенок)
-    // material->specularColor = glm::vec3(0.2f, 0.1f, 0.05f);  // Слабые зеркальные отражения
-    // material->shininess = 30.0f;  // Меньше шершавости, типично для деревянных поверхностей
-
-    // material->ambientColor = glm::vec3(0.24725f, 0.1995f, 0.0745f);  // Тусклый амбиентный цвет, похожий на золото
-    // material->diffuseColor = glm::vec3(0.75164f, 0.60648f, 0.22648f);  // Диффузный цвет золота
-    // material->specularColor = glm::vec3(0.628281f, 0.555802f, 0.366065f);  // Зеркальные отражения для золота
-    // material->shininess = 51.2f;  // Средняя шершавость, для блеска золота
+    material->ambientColor = glm::vec3(1, 1, 1);
+    material->diffuseColor = glm::vec3(0.4f, 0.4f, 0.4f);
+    material->specularColor = glm::vec3(0.7f, 0.7f, 0.7f);
+    material->shininess = 10.0f;
 
     cube->setPosition(glm::vec3(0, 0, 0));
     cube->setRotation(glm::vec3(0, 0, 0));
     cube->setScale(glm::vec3(1, 1, 1));
     cube->setMaterial(material);
     openglWidget->addShape(cube);
-   
     i += 1;
-
 }
 
 std::string MainWindow::getPenultimateWord(const QString& qstringPath) {
@@ -84,6 +70,11 @@ std::string MainWindow::getPenultimateWord(const QString& qstringPath) {
 
     // Возвращаем предпоследнюю часть
     return parts[parts.size() - 2];
+}
+
+void MainWindow::displayFPS()
+{
+    ui->fps->display(openglWidget->getFPS());
 }
 
 void MainWindow::addMeshButtonClicked()
@@ -111,11 +102,26 @@ void MainWindow::addMeshButtonClicked()
     
 }
 
-void MainWindow::addLightButtonClicked() 
+void MainWindow::changeProjectionButtonClicked()
+{
+    openglWidget->changeCameraProjection();
+}
+
+void MainWindow::startScene()
+{
+    openglWidget->startScene();
+}
+
+void MainWindow::restorePosition()
+{
+    openglWidget->restorePosition();
+}
+
+void MainWindow::addLightButtonClicked()
 {
     qDebug() << "Add light!";
     std::shared_ptr<Light> pointLight = std::make_shared<PointLight>(
-        glm::vec3(-10.0f, -10.0f, -10.0f)     // Позиция источника света
+        glm::vec3(-3.0f, -3.0f, -3.0f)     // Позиция источника света
     );
 
     std::shared_ptr<Light> spotLight = std::make_shared<SpotLight>(
@@ -124,65 +130,53 @@ void MainWindow::addLightButtonClicked()
     );
 
     std::shared_ptr<Light> dirLight = std::make_shared<DirectionalLight>(
-        glm::vec3(0.0f, -1.0f, 0.0f)      // Направление света (например, вниз)
+        glm::vec3(-1.0f, -1.0f, -1.0f)      // Направление света (например, вниз)
     );
-    openglWidget->addLight(spotLight);
+    openglWidget->addLight(pointLight);
     // openglWidget->addLight(spotLight);
-    // openglWidget->addLight(dirLight);
+    // openglWidget->addLight(spotLight);
+    // openglWidget->addLight(spotLight);
 }
 
 void MainWindow::addItemToList(int i, const std::string& type)
 {   
-
-    // Создаем новый элемент списка
     QListWidgetItem* newItem = new QListWidgetItem(QString::fromStdString(type), ui->listWidget);
     
-    // Привязываем числовое значение к элементу
-    newItem->setData(Qt::UserRole, i);  // Qt::UserRole можно использовать для хранения целых значений
+    newItem->setData(Qt::UserRole, i);
 
-    // Можно также привязать тип (строку) как дополнительные данные
     newItem->setData(Qt::UserRole + 1, QString::fromStdString(type));
 
-    // Добавляем элемент в список
     ui->listWidget->addItem(newItem);
 }
 
 void MainWindow::onObjectSelected(QListWidgetItem *item)
 {
-    // Извлекаем числовое значение (например, ID)
     int id = item->data(Qt::UserRole).toInt();
 
-    // Извлекаем строку с типом
     QString type = item->data(Qt::UserRole + 1).toString();
 
-    // Выводим данные для проверки
     qDebug() << "Selected Item ID: " << id;
     qDebug() << "Item Type: " << type;
 
     std::shared_ptr<Shape> selectedShape;
     selectedShape = openglWidget->getAllShapes()[id];
     if (selectedShape) {
-        // Создаем диалоговое окно с кнопками "Настройки" и "Удалить"
         QMessageBox dialog;
         dialog.setWindowTitle("Действия с объектом");
         dialog.setText("Выберите действие для объекта:");
 
-        // Кнопка для перехода в настройки объекта
         QPushButton *settingsButton = dialog.addButton("Настройки", QMessageBox::ActionRole);
         
-        // Кнопка для удаления объекта
         QPushButton *deleteButton = dialog.addButton("Удалить", QMessageBox::ActionRole);
         
-        // Показываем диалог
         dialog.exec();
 
-        // Проверяем, какая кнопка была нажата
         if (dialog.clickedButton() == settingsButton) {
-            showObjectSettings(selectedShape);  // Переход в настройки объекта
+            showObjectSettings(selectedShape);
         } else if (dialog.clickedButton() == deleteButton) {
             openglWidget->eraseShape(selectedShape);
-            int row = ui->listWidget->row(item);  // Получаем индекс элемента в списке
-            ui->listWidget->takeItem(row);         // Удаляем элемент из списка
+            int row = ui->listWidget->row(item);
+            ui->listWidget->takeItem(row);
             delete item; 
             i -= 1;
         }
@@ -196,9 +190,6 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
     settingsDialog.setWindowTitle("Настройки объекта");
     settingsDialog.resize(400, 600);
 
-
-
-    // // Компоновка
     QVBoxLayout *layout = new QVBoxLayout();
 
     // Раздел для позиции
@@ -347,10 +338,6 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
     diffuseColorGroup->setLayout(diffuseColorLayout);
     layout->addWidget(diffuseColorGroup);
 
-
-
-
-
     // Раздел для SpecularColor
     QGroupBox *specularColorGroup = new QGroupBox("SpecularColor");
     QFormLayout *specularColorLayout = new QFormLayout;
@@ -436,8 +423,7 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape)
     settingsDialog.exec();
 }
 
-
-MainWindow::~MainWindow() 
+MainWindow::~MainWindow()
 {
     delete ui;
 }

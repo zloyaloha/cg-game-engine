@@ -25,7 +25,7 @@ class PointLight : public Light {
         float constant;
         float linear;
         float quadratic;
-        PointLight(glm::vec3 position, glm::vec3 color = glm::vec3(1.0f), float intensity = 50.0f,
+        PointLight(glm::vec3 position, glm::vec3 color = glm::vec3(1.0f), float intensity = 10.0f,
                float constant = 1.0f, float linear = 0.09f, float quadratic = 0.032f)
         : Light(POINT, color, intensity), position(position), constant(constant), linear(linear), quadratic(quadratic) {}
 
@@ -40,7 +40,7 @@ class SpotLight : public Light {
         float cutOff;
         float outerCutOff;
 
-        SpotLight(glm::vec3 position, glm::vec3 direction, glm::vec3 color = glm::vec3(1.0f), float intensity = 10.0f,
+        SpotLight(glm::vec3 position, glm::vec3 direction, glm::vec3 color = glm::vec3(1.0f), float intensity = 1.0f,
               float cutOff = glm::cos(glm::radians(12.5f)), float outerCutOff = glm::cos(glm::radians(15.0f)))
         : Light(SPOT, color, intensity), position(position), direction(direction), cutOff(cutOff), outerCutOff(outerCutOff) {}
         
@@ -51,7 +51,7 @@ class DirectionalLight : public Light {
     public:
         glm::vec3 direction;
 
-        DirectionalLight(glm::vec3 direction, glm::vec3 color = glm::vec3(1.0f), float intensity = 5.0f)
+        DirectionalLight(glm::vec3 direction, glm::vec3 color = glm::vec3(1.0f), float intensity = 1.0f)
         : Light(DIRECTIONAL, color, intensity), direction(direction) {}
 
         void loadLightToShader(std::shared_ptr<QOpenGLShaderProgram> shader, int index) const override;

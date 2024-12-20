@@ -35,7 +35,13 @@ public slots:
     void addLightButtonClicked();
     void addCubeButtonClicked();
     void addMeshButtonClicked();
+    void changeProjectionButtonClicked();
+    void restorePosition();
+    void startScene();
 private:
+    void displayFPS();
+
+    std::shared_ptr<QTimer> fpsUpdateTimer;
     int i{0};
     Ui::MainWindow* ui;
     OpenGLWidget* openglWidget;
