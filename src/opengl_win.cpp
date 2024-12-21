@@ -12,7 +12,7 @@ OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent),
     QSurfaceFormat format;
     format.setDepthBufferSize(24);
     format.setStencilBufferSize(8);
-    format.setVersion(3, 3);
+    format.setVersion(4, 2);
     format.setProfile(QSurfaceFormat::CoreProfile);
     QSurfaceFormat::setDefaultFormat(format);
 
@@ -27,7 +27,6 @@ void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
     shape->setVao(vaos[shape->getType()]);
     shape->setProjectionMatrix(camera.getProjectionMatrix(aspectRatio));
     shape->setViewMatrix(camera.getViewMatrix());
-    shape->setAcceleration(glm::vec3(0,0,0));
     shape->initialize();
     shapes.push_back(shape);
     setLigths();

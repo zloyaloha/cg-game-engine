@@ -67,7 +67,6 @@ void Shape::setMass(float mass)
 
 void Shape::setGhostRegime(bool is_ghost)
 {
-    std::cout << is_ghost << std::endl;
     _isGhost = is_ghost;
 }
 

@@ -475,8 +475,6 @@ void MainWindow::onObjectSelected(QListWidgetItem *item)
     }
 }
 
-
-
 void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
 {
     QDialog settingsDialog;
@@ -532,6 +530,7 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
     bool ghost = shape->isGhost();
     QLineEdit *massLine = new QLineEdit(QString::number(mass));
     QCheckBox *isGhost = new QCheckBox();
+    isGhost->setChecked(ghost);
 
     parametersLayout->addRow("Масса:", massLine);
     parametersLayout->addRow("Призрак:", isGhost);
@@ -761,8 +760,8 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
         shape->setShininess(shininessX->text().toFloat());
         shape->setVelocity(glm::vec3(velocityX->text().toFloat(), velocityY->text().toFloat(), velocityZ->text().toFloat()));
         shape->setAcceleration(glm::vec3(accelerationX->text().toFloat(), accelerationY->text().toFloat(), accelerationZ->text().toFloat()));
-        shape->setMass(mass);
-        shape->setGhostRegime(ghost);
+        shape->setMass(massLine->text().toFloat());
+        shape->setGhostRegime(isGhost->isChecked());
         settingsDialog.accept();
     });
     layout->addWidget(saveButton);

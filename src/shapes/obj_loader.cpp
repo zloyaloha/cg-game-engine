@@ -58,29 +58,24 @@ void ObjLoader::parseMaterial(const aiMaterial* material, std::shared_ptr<Mesh>&
     if (material->Get(AI_MATKEY_COLOR_AMBIENT, color) == AI_SUCCESS) {
         mat->ambientColor = glm::vec3(color.r, color.g, color.b);
     }
-    std::cout << "Ambient " << mat->ambientColor.x << ' ' << mat->ambientColor.y << ' ' << mat->ambientColor.z << std::endl;
 
     if (material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == AI_SUCCESS) {
         mat->diffuseColor = glm::vec3(color.r, color.g, color.b);
     }
-    std::cout << "Diffuse " << mat->diffuseColor.x << ' ' << mat->diffuseColor.y << ' ' << mat->diffuseColor.z << std::endl;
 
     if (material->Get(AI_MATKEY_COLOR_SPECULAR, color) == AI_SUCCESS) {
         mat->specularColor = glm::vec3(color.r, color.g, color.b);
     }
-    std::cout << "Specular " << mat->specularColor.x << ' ' << mat->specularColor.y << ' ' << mat->specularColor.z << std::endl;
 
     float shininess = 0.0f;
     if (material->Get(AI_MATKEY_SHININESS, shininess) == AI_SUCCESS) {
         mat->shininess = shininess;
     }
-    std::cout << "Shininess " << mat->shininess << std::endl;
 
     float opacity = 1.0f;
     if (material->Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
         mat->opacity = opacity;
     }
-    std::cout << "Opacity " << mat->opacity << std::endl;
 
     mesh->material = mat;
 
@@ -95,21 +90,7 @@ void ObjLoader::parseMaterial(const aiMaterial* material, std::shared_ptr<Mesh>&
             }
         }
     }
-
-    // for (unsigned int j = 0; j < material->GetTextureCount(aiTextureType_SPECULAR); ++j) {
-    //     aiString path;
-    //     if (material->GetTexture(aiTextureType_SPECULAR, j, &path) == AI_SUCCESS) {
-    //         QOpenGLTexture* texture = loadTexture(path.C_Str());
-    //         if (texture) {
-    //             mesh->textures.push_back({texture, aiTextureType_SPECULAR});
-    //         } else {
-    //             std::cerr << "Failed to load texture: " << path.C_Str() << std::endl;
-    //         }
-    //     }
-    // }
 }
-
-
 
 QOpenGLTexture* ObjLoader::loadTexture(const std::string& texturePath) {
     QImage image(QString::fromStdString(texturePath));
