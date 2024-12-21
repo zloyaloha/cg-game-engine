@@ -67,7 +67,7 @@
             <item>
              <widget class="QPushButton" name="addDirectionalLight">
               <property name="text">
-               <string>Точечный источник</string>
+               <string>Направленный свет</string>
               </property>
              </widget>
             </item>
@@ -81,7 +81,7 @@
             <item>
              <widget class="QPushButton" name="addPointLight">
               <property name="text">
-               <string>Направленный свет</string>
+               <string>Точечный источник</string>
               </property>
              </widget>
             </item>

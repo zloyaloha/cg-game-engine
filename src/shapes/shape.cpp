@@ -243,6 +243,14 @@ void Shape::setLights(const std::vector<std::shared_ptr<Light>> &shapeLights)
     lights = shapeLights;
 }
 
+void Shape::eraseLight(std::shared_ptr<Light>& light) {
+    auto it = std::find(this->lights.begin(), this->lights.end(), light);
+    
+    if (it != this->lights.end()) {
+        this->lights.erase(it);
+    }
+}
+
 std::string Shape::getType() const
 {
     return type;

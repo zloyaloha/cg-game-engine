@@ -33,7 +33,11 @@ public:
     void addLight(std::shared_ptr<Light> light);
     std::vector<std::shared_ptr<Shape>> getAllShapes();
     std::vector<std::shared_ptr<Light>> getAllLights();
+
     void eraseShape(int index);
+
+    void eraseShape(std::shared_ptr<Shape> shape);
+    void eraseLight(std::shared_ptr<Light> light);
 
     int getFPS();
     void startScene();

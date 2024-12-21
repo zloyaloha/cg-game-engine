@@ -90,6 +90,7 @@ class Shape : public std::enable_shared_from_this<Shape> {
         void loadMaterialToShader();
 
         void setLights(const std::vector<std::shared_ptr<Light>>& light);
+        void eraseLight(std::shared_ptr<Light>& light);
 
         void update(float deltaTime);
         void initAABB();

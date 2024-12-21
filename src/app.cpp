@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 {
     ui->setupUi(this);
     connect(ui->addCube, &QPushButton::clicked, this, &MainWindow::addCubeButtonClicked);
+
     connect(ui->addMesh, &QPushButton::clicked, this, &MainWindow::addMeshButtonClicked);
     connect(ui->changeProjection, &QPushButton::clicked, this, &MainWindow::changeProjectionButtonClicked);
     connect(ui->startScene, &QPushButton::clicked, this, &MainWindow::startScene);
@@ -84,21 +85,35 @@ void MainWindow::addDirectionalLightButtonClicked()
 
 void MainWindow::onLightSourceSelected(QListWidgetItem *light_source)
 {
-    // Извлекаем числовое значение (например, ID)
     int id = light_source->data(Qt::UserRole).toInt();
-
-    // Извлекаем строку с типом
     QString type = light_source->data(Qt::UserRole + 1).toString();
 
-    // Выводим данные для проверки
     qDebug() << "Selected Light Source ID: " << id;
     qDebug() << "Light Source Type: " << type;
 
-    // Например, если у вас есть указатель на объект Shape, привязанный к этим данным
-    // Получаем объект Shape, например, из списка или другой структуры данных
-    std::shared_ptr<Light> selected_light_source;
-    selected_light_source = openglWidget->getAllLights()[id];
-    if (selected_light_source) {
+    auto light_sources = openglWidget->getAllLights();
+
+    if (id < 0 || id > light_sources.size() - 1) {
+        qDebug() << "Out of Range";
+
+        return;
+    }
+
+    std::shared_ptr<Light> selected_light_source = light_sources[id];
+
+    if (!selected_light_source) {
+        return;
+    }
+
+    QMenu context_menu(this);
+
+    QAction *settingsAction = context_menu.addAction("Настройки");
+    QAction *deleteAction = context_menu.addAction("Удалить");
+
+    QAction *selectedAction = context_menu.exec(QCursor::pos());
+
+
+    if (selectedAction == settingsAction) {
         Light::LightType light_type = selected_light_source->getType();
 
         if (light_type == Light::POINT) {
@@ -111,6 +126,16 @@ void MainWindow::onLightSourceSelected(QListWidgetItem *light_source)
             qDebug() << "It works 3";
             showDirectionalLightSourceSettings(selected_light_source);
         }
+    } else if (selectedAction == deleteAction) {
+        openglWidget->eraseLight(selected_light_source);
+        int row = ui->lightSources->row(light_source);
+        ui->lightSources->takeItem(row);
+
+        delete light_source; 
+
+        openglWidget->update();
+
+        counterLights -= 1;
     }
 }
 

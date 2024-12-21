@@ -56,6 +56,20 @@ void OpenGLWidget::eraseShape(int index)
     shapes.erase(shapes.begin() + index);
 }
 
+void OpenGLWidget::eraseLight(std::shared_ptr<Light> light)
+{
+    for (auto shape: shapes) {
+        shape->eraseLight(light);
+    }
+    
+    auto it = std::find(this->lights.begin(), this->lights.end(), light);
+    
+    if (it != this->lights.end()) {
+        this->lights.erase(it);
+    }
+}
+
+
 void OpenGLWidget::updateFPS()
 {
     float currentTime = static_cast<float>(QTime::currentTime().msecsSinceStartOfDay());
