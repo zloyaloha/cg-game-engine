@@ -54,14 +54,13 @@ class Shape : public std::enable_shared_from_this<Shape> {
         void setAcceleration(const glm::vec3 &acceleration);
         void setInitialPosition(const glm::vec3& position);
         void setMass(float mass);
-        void changeGhostRegime();
+        void setGhostRegime(bool is_ghost);
 
         void updateModelMatrix();
         glm::vec3 getScale() const;
         glm::vec3 getRotation() const;
         glm::vec3 getPosition() const;
 
-        
         void setAmbientColor(const glm::vec3& color);
         void setDiffuseColor(const glm::vec3& color);
         void setSpecularColor(const glm::vec3& color);
@@ -108,7 +107,7 @@ class Shape : public std::enable_shared_from_this<Shape> {
         glm::vec3 _scale;
         glm::vec3 _rotation;
         glm::vec3 _position;
-        float _mass;
+        float _mass{0};
 
         std::string type;
 
@@ -128,9 +127,9 @@ class Shape : public std::enable_shared_from_this<Shape> {
 
         std::shared_ptr<ShapeHistory> history;
     protected:
-        glm::vec3 _velocity;
-        glm::vec3 _acceleration;
-        glm::vec3 _initialPosition;
+        glm::vec3 _velocity{glm::vec3(0)};
+        glm::vec3 _acceleration{glm::vec3(0)};
+        glm::vec3 _initialPosition{glm::vec3(0)};
 };
 
 class ShapeMemento {

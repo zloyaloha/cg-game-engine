@@ -3,7 +3,7 @@
 #include <QFont>
 
 OpenGLWidget::OpenGLWidget(QWidget *parent) : QOpenGLWidget(parent),
-    camera(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
+    camera(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 1.0f, 0.0f))
 {
     aspectRatio = float(height()) / float(width());
     setFocusPolicy(Qt::StrongFocus);
@@ -32,16 +32,6 @@ void OpenGLWidget::addShape(std::shared_ptr<Shape> shape)
     shapes.push_back(shape);
     setLigths();
     update();
-    if (shape->getType() == "mesh") {
-        shape->setVelocity(glm::vec3(0, 0, 0.01));
-        shape->setMass(2);
-        shape->changeGhostRegime();
-    } else {
-        shape->setPosition(glm::vec3(-2.5, 0, 6));
-        shape->setVelocity(glm::vec3(0, 0, 0));
-        shape->setMass(3);
-        shape->changeGhostRegime();
-    }
     shaders[shape->getType()]->release();
 }
 
@@ -61,12 +51,9 @@ std::vector<std::shared_ptr<Shape>> OpenGLWidget::getAllShapes()
     return shapes;
 }
 
-void OpenGLWidget::eraseShape(std::shared_ptr<Shape> shape)
+void OpenGLWidget::eraseShape(int index)
 {
-    auto it = std::find(this->shapes.begin(), this->shapes.end(), shape);
-    if (it != this->shapes.end()) {
-        this->shapes.erase(it);
-    }
+    shapes.erase(shapes.begin() + index);
 }
 
 void OpenGLWidget::updateFPS()
@@ -164,16 +151,16 @@ void OpenGLWidget::paintGL()
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     updateCamera();
 
-    // if (started) {
-    //     if (physicsThread.joinable()) {
-    //         physicsThread.join();
-    //     }
-    //     physicsThread = std::thread(&Physics::calculateIntersect, &physic, std::ref(shapes));
-    // }
-
     if (started) {
-        physic.calculateIntersect(shapes);
+        if (physicsThread.joinable()) {
+            physicsThread.join();
+        }
+        physicsThread = std::thread(&Physics::calculateIntersect, &physic, std::ref(shapes));
     }
+
+    // if (started) {
+    //     physic.calculateIntersect(shapes);
+    // }
 
     for (auto shape : shapes) {
         shape->setViewMatrix(camera.getViewMatrix());
@@ -187,7 +174,6 @@ void OpenGLWidget::paintGL()
 }
 
 void OpenGLWidget::keyPressEvent(QKeyEvent *event) {
-    
     keys[event->key()] = true;
 }
 

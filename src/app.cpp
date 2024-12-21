@@ -2,26 +2,19 @@
 #include "./ui_mainwindow.h"
 #include <QDebug>
 
-namespace {
-    const int WIDTH = 512;
-    const int HEIGT = 512;
-}
-
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     connect(ui->addCube, &QPushButton::clicked, this, &MainWindow::addCubeButtonClicked);
-    connect(ui->addLight, &QPushButton::clicked, this, &MainWindow::addLightButtonClicked);
     connect(ui->addMesh, &QPushButton::clicked, this, &MainWindow::addMeshButtonClicked);
     connect(ui->changeProjection, &QPushButton::clicked, this, &MainWindow::changeProjectionButtonClicked);
     connect(ui->startScene, &QPushButton::clicked, this, &MainWindow::startScene);
     connect(ui->restorePosition, &QPushButton::clicked, this, &MainWindow::restorePosition);
     connect(ui->listWidget, &QListWidget::itemClicked, this, &MainWindow::onObjectSelected);
     setWindowTitle("Игры Разума");
-    setGeometry(400, 200, 1280, 720);
 
     openglWidget = new OpenGLWidget(ui->openGLWidget);
-    openglWidget->resize(920, 512);
+    openglWidget->resize(1080, 720);
 
 
     connect(ui->listWidget, &QListWidget::itemClicked, this, &MainWindow::onObjectSelected);
@@ -41,7 +34,7 @@ void MainWindow::addItemToLightList(int i, const std::string& light_type)
 {
     // Создаем новый элемент списка
     QListWidgetItem* new_light_item = new QListWidgetItem(QString::fromStdString(light_type), ui->lightSources);
-    
+
     // Привязываем числовое значение к элементу
     new_light_item->setData(Qt::UserRole, i);  // Qt::UserRole можно использовать для хранения целых значений
 
@@ -54,19 +47,19 @@ void MainWindow::addItemToLightList(int i, const std::string& light_type)
 
 void MainWindow::addPointLightButtonClicked()
 {
-    addItemToLightList(i, "Point Light");
+    addItemToLightList(counterLights, "Point Light");
     std::shared_ptr<PointLight> point_light = std::make_shared<PointLight>(
         glm::vec3(-10.0f, -10.0f, -10.0f) // Позиция источника света
     );
 
     openglWidget->addLight(point_light);
 
-    i += 1;
+    counterLights += 1;
 }
 
 void MainWindow::addSpotLightButtonClicked()
 {
-    addItemToLightList(i, "Spot Light");
+    addItemToLightList(counterLights, "Spot Light");
     std::shared_ptr<SpotLight> spot_light = std::make_shared<SpotLight>(
         glm::vec3(5.0f, 5.0f, 5.0f), // Позиция прожектора
         glm::vec3(1.0f, 1.0f, 1.0f)  // Направление прожектора
@@ -74,19 +67,19 @@ void MainWindow::addSpotLightButtonClicked()
 
     openglWidget->addLight(spot_light);
 
-    i += 1;
+    counterLights += 1;
 }
 
 void MainWindow::addDirectionalLightButtonClicked()
 {
-    addItemToLightList(i, "Directional Light");
+    addItemToLightList(counterLights, "Directional Light");
     std::shared_ptr<DirectionalLight> directional_light = std::make_shared<DirectionalLight>(
         glm::vec3(0.0f, -1.0f, 0.0f) // Направление света (например, вниз)
     );
 
     openglWidget->addLight(directional_light);
 
-    i += 1;
+    counterLights += 1;
 }
 
 void MainWindow::onLightSourceSelected(QListWidgetItem *light_source)
@@ -124,7 +117,7 @@ void MainWindow::onLightSourceSelected(QListWidgetItem *light_source)
 void MainWindow::showPointLightSourceSettings(std::shared_ptr<Light> pointLight)
 {
     auto point_light_source = std::dynamic_pointer_cast<PointLight>(pointLight);
-    
+
     QDialog settingsDialog;
     settingsDialog.setWindowTitle("Point Light Source Settings");
     settingsDialog.resize(300, 400);
@@ -322,20 +315,19 @@ void MainWindow::showDirectionalLightSourceSettings(std::shared_ptr<Light> direc
 
 void MainWindow::addCubeButtonClicked()
 {
-    std::shared_ptr<Cube> cube = std::make_shared<Cube>(1.0f, glm::vec3(0.0f, 0.0f, 1.0f + i));
+    std::shared_ptr<Cube> cube = std::make_shared<Cube>(1.0f, glm::vec3(0.0f, 0.0f, 0.0f));
     std::shared_ptr<Material> material = std::make_shared<Material>();
     material->ambientColor = glm::vec3(1, 1, 1);
     material->diffuseColor = glm::vec3(0.4f, 0.4f, 0.4f);
     material->specularColor = glm::vec3(0.7f, 0.7f, 0.7f);
     material->shininess = 10.0f;
-    cube->setPosition(glm::vec3(0, 0, 0));
     cube->setRotation(glm::vec3(0, 0, 0));
     cube->setScale(glm::vec3(1, 1, 1));
     cube->setMaterial(material);
-    std::string name = "cube" + std::to_string(i);
-    addItemToList(i, name);
+    std::string name = "cube" + std::to_string(counterObjs);
+    addItemToList(name, {counterObjs});
     openglWidget->addShape(cube);
-    i += 1;
+    counterObjs += 1;
 }
 
 std::string MainWindow::getPenultimateWord(const QString& qstringPath) {
@@ -371,28 +363,22 @@ void MainWindow::addMeshButtonClicked()
     if (filePath.isEmpty()) {
         return;
     }
-
-    
     std::vector<std::shared_ptr<Mesh>> groupMeshes;
-    
-
     if (QFile::exists(filePath)) {
         qDebug() << "Load mesh from " << filePath;
         std::string name = getPenultimateWord(filePath);
         ObjLoader loader;
         std::vector<std::shared_ptr<Mesh>> meshes = loader.load(filePath.toStdString());
-        // std::unordered_map<int, std::vector<std::shared_ptr<Mesh>>> objectGroups;
+        QList<int> list;
         for (const auto mesh: meshes) {
             openglWidget->addShape(mesh);
             mesh->setPosition(glm::vec3(0, 0, 0));
             mesh->setRotation(glm::vec3(0, 0, 0));
             mesh->setScale(glm::vec3(1, 1, 1));
-            // addItemToList(i, name);
-            groupMeshes.push_back(mesh);
+            list.append(counterObjs);
+            ++counterObjs;
         }
-        objectGroups[groupId] = groupMeshes; // Сохраняем группу
-        addItemToList(groupId, name);       // Привязываем группу к списку
-        groupId++;
+        addItemToList(name, list);
         qDebug() << "Add" << meshes.size() << "meshes!";
     }
 }
@@ -412,85 +398,83 @@ void MainWindow::restorePosition()
     openglWidget->restorePosition();
 }
 
-void MainWindow::addLightButtonClicked()
+void MainWindow::addItemToList(const std::string& type, const QVector<int>& objectIds)
 {
-    qDebug() << "Add light!";
-    std::shared_ptr<Light> pointLight = std::make_shared<PointLight>(
-        glm::vec3(-3.0f, -3.0f, -3.0f)     // Позиция источника света
-    );
-
-    std::shared_ptr<Light> spotLight = std::make_shared<SpotLight>(
-        glm::vec3(5.0f, 5.0f, 5.0f),       // Позиция прожектора
-        glm::vec3(1.0f, 1.0f, 1.0f)      // Направление прожектора
-    );
-
-    std::shared_ptr<Light> dirLight = std::make_shared<DirectionalLight>(
-        glm::vec3(-1.0f, -1.0f, -1.0f)      // Направление света (например, вниз)
-    );
-    openglWidget->addLight(pointLight);
-    // openglWidget->addLight(spotLight);
-    // openglWidget->addLight(spotLight);
-    // openglWidget->addLight(spotLight);
-}
-
-void MainWindow::addItemToList(int i, const std::string& type)
-{   
     QListWidgetItem* newItem = new QListWidgetItem(QString::fromStdString(type), ui->listWidget);
-    
-    newItem->setData(Qt::UserRole, i);
 
-    newItem->setData(Qt::UserRole + 1, QString::fromStdString(type));
+    newItem->setData(Qt::UserRole, QString::fromStdString(type));
+
+    QVariantList objectList;
+    for (int objectId : objectIds) {
+        objectList.append(objectId);
+    }
+    newItem->setData(Qt::UserRole + 1, objectList);
 
     ui->listWidget->addItem(newItem);
 }
 
 void MainWindow::onObjectSelected(QListWidgetItem *item)
 {
-    int id = item->data(Qt::UserRole).toInt();
+    QString type = item->data(Qt::UserRole).toString();
+    QVariantList objectList = item->data(Qt::UserRole + 1).toList();
 
-    QString type = item->data(Qt::UserRole + 1).toString();
+    if (objectList.isEmpty()) {
+        qDebug() << "Ошибка: objectList пуст";
+        return;
+    }
+    int id = objectList[0].toInt();
 
-    qDebug() << "Selected Item ID: " << id;
-    qDebug() << "Item Type: " << type;
+    auto shapes = openglWidget->getAllShapes();
+    if (id < 0 || id >= shapes.size()) {
+        return;
+    }
 
-    std::shared_ptr<Shape> selectedShape;
-    selectedShape = openglWidget->getAllShapes()[id];
-    if (selectedShape) {
-        QMessageBox dialog;
-        dialog.setWindowTitle("Действия с объектом");
-        dialog.setText("Выберите действие для объекта:");
+    std::shared_ptr<Shape> selectedShape = shapes[id];
 
-        QPushButton *settingsButton = dialog.addButton("Настройки", QMessageBox::ActionRole);
-        
-        QPushButton *deleteButton = dialog.addButton("Удалить", QMessageBox::ActionRole);
-        
-        dialog.exec();
+    QMenu contextMenu(this);
 
-        if (dialog.clickedButton() == settingsButton) {
-            showObjectSettings(selectedShape, id);
-        } else if (dialog.clickedButton() == deleteButton) {
-            if (!type.startsWith("cube")) {
-                for (auto mesh: objectGroups[id]) {
-                    openglWidget->eraseShape(mesh);
-                    // std::cout << "Deleted mesh" << std::endl;
-                }
-                int row = ui->listWidget->row(item);
-                ui->listWidget->takeItem(row);
-                delete item;
-                objectGroups.erase(id);
-                groupId -= 1;
-            } else {
-                openglWidget->eraseShape(selectedShape);
-                int row = ui->listWidget->row(item);
-                ui->listWidget->takeItem(row);
-                delete item; 
-                i -= 1;
+    QAction *settingsAction = contextMenu.addAction("Настройки");
+    QAction *deleteAction = contextMenu.addAction("Удалить");
+
+    // Показ меню под курсором
+    QAction *selectedAction = contextMenu.exec(QCursor::pos());
+
+    if (!selectedAction) {
+        return;
+    }
+
+    if (selectedAction == settingsAction) {
+        showObjectSettings(selectedShape, id);
+    } else if (selectedAction == deleteAction) {
+        if (!type.startsWith("cube")) {
+
+            for (const QVariant& var : objectList) {
+                openglWidget->eraseShape(var.toInt());
             }
-            
-        
+
+            int row = ui->listWidget->row(item);
+            if (row < 0) {
+                qDebug() << "Ошибка: item не найден в listWidget";
+                return;
+            }
+
+            ui->listWidget->takeItem(row);
+            counterObjs -= 1;
+        } else {
+            openglWidget->eraseShape(id);
+
+            int row = ui->listWidget->row(item);
+            if (row < 0) {
+                qDebug() << "Ошибка: item не найден в listWidget";
+                return;
+            }
+
+            ui->listWidget->takeItem(row);
+            counterObjs -= 1;
         }
     }
 }
+
 
 
 void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
@@ -499,7 +483,7 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
     settingsDialog.setWindowTitle("Настройки объекта");
     settingsDialog.resize(400, 600);
 
-    QVBoxLayout *layout = new QVBoxLayout();
+    QGridLayout  *layout = new QGridLayout ();
 
     // Раздел для позиции
     QGroupBox *positionGroup = new QGroupBox("Позиция");
@@ -514,10 +498,48 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
     positionLayout->addRow("y:", positionY);
     positionLayout->addRow("z:", positionZ);
     positionGroup->setLayout(positionLayout);
-    layout->addWidget(positionGroup);
+    layout->addWidget(positionGroup, 0, 0);
+
+    QGroupBox *velocityGroup = new QGroupBox("Скорость");
+    QFormLayout *velocityLayout = new QFormLayout;
+    glm::vec3 velocity = shape->getVelocity();
+    QLineEdit *velocityX = new QLineEdit(QString::number(velocity.x));
+    QLineEdit *velocityY = new QLineEdit(QString::number(velocity.y));
+    QLineEdit *velocityZ = new QLineEdit(QString::number(velocity.z));
+
+    velocityLayout->addRow("x:", velocityX);
+    velocityLayout->addRow("y:", velocityY);
+    velocityLayout->addRow("z:", velocityZ);
+    velocityGroup->setLayout(velocityLayout);
+    layout->addWidget(velocityGroup, 2, 0);
+
+    QGroupBox *accelerationGroup = new QGroupBox("Ускорение");
+    QFormLayout *accelerationLayout = new QFormLayout;
+    glm::vec3 acceleration = shape->getAcceleration();
+    QLineEdit *accelerationX = new QLineEdit(QString::number(acceleration.x));
+    QLineEdit *accelerationY = new QLineEdit(QString::number(acceleration.y));
+    QLineEdit *accelerationZ = new QLineEdit(QString::number(acceleration.z));
+
+    accelerationLayout->addRow("x:", accelerationX);
+    accelerationLayout->addRow("y:", accelerationY);
+    accelerationLayout->addRow("z:", accelerationZ);
+    accelerationGroup->setLayout(accelerationLayout);
+    layout->addWidget(accelerationGroup, 2, 1);
+
+    QGroupBox *parametersGroup = new QGroupBox("Параметры");
+    QFormLayout *parametersLayout = new QFormLayout;
+    float mass = shape->getMass();
+    bool ghost = shape->isGhost();
+    QLineEdit *massLine = new QLineEdit(QString::number(mass));
+    QCheckBox *isGhost = new QCheckBox();
+
+    parametersLayout->addRow("Масса:", massLine);
+    parametersLayout->addRow("Призрак:", isGhost);
+    parametersGroup->setLayout(parametersLayout);
+    layout->addWidget(parametersGroup, 2, 2);
 
     // Раздел для Rotation
-    QGroupBox *rotationGroup = new QGroupBox("Rotation");
+    QGroupBox *rotationGroup = new QGroupBox("Поворот");
     QFormLayout *rotationLayout = new QFormLayout;
     glm::vec3 rotation = shape->getRotation();
 
@@ -556,7 +578,7 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
     rotationLayout->addRow(rotZlabel, rotZSlider);
     rotationLayout->addRow("", rotZvalue); // Значение для b
     rotationGroup->setLayout(rotationLayout);
-    layout->addWidget(rotationGroup);
+    layout->addWidget(rotationGroup, 0, 1);
 
     // Раздел для AmbientColor
     QGroupBox *ambientColorGroup = new QGroupBox("AmbientColor");
@@ -601,7 +623,7 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
     ambientColorLayout->addRow(colorAZLabel, colorAZSlider);
     ambientColorLayout->addRow("", colorAZValue); // Значение для b
     ambientColorGroup->setLayout(ambientColorLayout);
-    layout->addWidget(ambientColorGroup);
+    layout->addWidget(ambientColorGroup, 1, 0);
 
     // Раздел для DiffuseColor
     QGroupBox *diffuseColorGroup = new QGroupBox("DiffuseColor");
@@ -646,7 +668,7 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
     diffuseColorLayout->addRow(colorDZLabel, colorDZSlider);
     diffuseColorLayout->addRow("", colorDZValue); // Значение для b
     diffuseColorGroup->setLayout(diffuseColorLayout);
-    layout->addWidget(diffuseColorGroup);
+    layout->addWidget(diffuseColorGroup, 1, 1);
 
     // Раздел для SpecularColor
     QGroupBox *specularColorGroup = new QGroupBox("SpecularColor");
@@ -691,16 +713,15 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
     specularColorLayout->addRow(colorSZLabel, colorSZSlider);
     specularColorLayout->addRow("", colorSZValue); // Значение для b
     specularColorGroup->setLayout(specularColorLayout);
-    layout->addWidget(specularColorGroup);
+    layout->addWidget(specularColorGroup, 1, 2);
 
-    
     QGroupBox *shininessGroup = new QGroupBox("ShininessColor");
     QFormLayout *shininessLayout = new QFormLayout;
     float shininess = shape->getShininess();
-    QLineEdit *shininessX = new QLineEdit(QString::number(shininess));    
+    QLineEdit *shininessX = new QLineEdit(QString::number(shininess));
     shininessLayout->addRow("shininess:", shininessX);
     shininessGroup->setLayout(shininessLayout);
-    layout->addWidget(shininessGroup);
+    layout->addWidget(shininessGroup, 1, 3);
 
     QGroupBox *scaleGroup =  new QGroupBox("Scale");
     QFormLayout *scaleLayout = new QFormLayout;
@@ -712,7 +733,7 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
     scaleLayout->addRow("y:", vecY);
     scaleLayout->addRow("z:", vecZ);
     scaleGroup->setLayout(scaleLayout);
-    layout->addWidget(scaleGroup);
+    layout->addWidget(scaleGroup, 0, 2);
 
     // Кнопка сохранения
     QPushButton *saveButton = new QPushButton("Сохранить");
@@ -721,18 +742,27 @@ void MainWindow::showObjectSettings(std::shared_ptr<Shape> shape, int groupId)
             for (auto& mesh: objectGroups[groupId]) {
                 glm::vec3 mesh_pos = mesh->getPosition();
                 mesh->setPosition(glm::vec3(mesh_pos.x + positionX->text().toFloat(), mesh_pos.y + positionY->text().toFloat(), mesh_pos.z + positionZ->text().toFloat()));
+                mesh->setAmbientColor(glm::vec3(colorAXSlider->value() / 255.0f, colorAYSlider->value() / 255.0f, colorAZSlider->value() / 255.0f));
+                mesh->setDiffuseColor(glm::vec3(colorDXSlider->value() / 255.0f, colorDYSlider->value() / 255.0f, colorDZSlider->value() / 255.0f));
+                mesh->setSpecularColor(glm::vec3(colorSXSlider->value() / 255.0f, colorSYSlider->value() / 255.0f, colorSZSlider->value() / 255.0f));
+                mesh->setScale(glm::vec3(vecX->text().toFloat(), vecY->text().toFloat(), vecZ->text().toFloat()));
+                mesh->setShininess(shininessX->text().toFloat());
+                mesh->setVelocity(glm::vec3(velocityX->text().toFloat(), velocityY->text().toFloat(), velocityZ->text().toFloat()));
+                mesh->setAcceleration(glm::vec3(accelerationX->text().toFloat(), accelerationY->text().toFloat(), accelerationZ->text().toFloat()));
+                mesh->setMass(mass);
+                mesh->setGhostRegime(ghost);
             }
-        } else {
-            shape->setPosition(glm::vec3(positionX->text().toFloat(), positionY->text().toFloat(), positionZ->text().toFloat()));
         }
-        
+        shape->setPosition(glm::vec3(positionX->text().toFloat(), positionY->text().toFloat(), positionZ->text().toFloat()));
         shape->setAmbientColor(glm::vec3(colorAXSlider->value() / 255.0f, colorAYSlider->value() / 255.0f, colorAZSlider->value() / 255.0f));
         shape->setDiffuseColor(glm::vec3(colorDXSlider->value() / 255.0f, colorDYSlider->value() / 255.0f, colorDZSlider->value() / 255.0f));
         shape->setSpecularColor(glm::vec3(colorSXSlider->value() / 255.0f, colorSYSlider->value() / 255.0f, colorSZSlider->value() / 255.0f));
         shape->setScale(glm::vec3(vecX->text().toFloat(), vecY->text().toFloat(), vecZ->text().toFloat()));
         shape->setShininess(shininessX->text().toFloat());
-        shape->setRotation(glm::vec3(rotXSlider->value(), rotYSlider->value(), rotZSlider->value()));
-
+        shape->setVelocity(glm::vec3(velocityX->text().toFloat(), velocityY->text().toFloat(), velocityZ->text().toFloat()));
+        shape->setAcceleration(glm::vec3(accelerationX->text().toFloat(), accelerationY->text().toFloat(), accelerationZ->text().toFloat()));
+        shape->setMass(mass);
+        shape->setGhostRegime(ghost);
         settingsDialog.accept();
     });
     layout->addWidget(saveButton);

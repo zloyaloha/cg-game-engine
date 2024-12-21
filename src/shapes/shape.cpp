@@ -65,9 +65,10 @@ void Shape::setMass(float mass)
     _mass = mass;
 }
 
-void Shape::changeGhostRegime()
+void Shape::setGhostRegime(bool is_ghost)
 {
-    _isGhost = !_isGhost;
+    std::cout << is_ghost << std::endl;
+    _isGhost = is_ghost;
 }
 
 void Shape::update(float deltaTime)

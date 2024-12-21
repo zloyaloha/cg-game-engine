@@ -6,6 +6,7 @@ void Physics::calculateIntersect(const std::vector<std::shared_ptr<Shape>>& shap
     for (int i = 0; i < shapes.size(); ++i) {
         for (int j = i + 1; j < shapes.size(); ++j) {
             if (shapes[i]->calculateIntersect(shapes[j])) {
+                std::cout << !shapes[i]->isGhost() << ' ' << !shapes[j]->isGhost() << std::endl;
                 if (!shapes[i]->isGhost() && !shapes[j]->isGhost()) {
                     resolveCollision(shapes[i], shapes[j]);
                 }

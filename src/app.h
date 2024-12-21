@@ -14,7 +14,7 @@
 #include <QVariant>
 #include <QFormLayout>
 #include <QGroupBox>
-
+#include <QCheckBox>
 
 
 QT_BEGIN_NAMESPACE
@@ -29,7 +29,7 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget* parent = nullptr);
 
-    void addItemToList(int i, const std::string& type);
+    void addItemToList(const std::string& type, const QVector<int>& objectIds);
     void onObjectSelected(QListWidgetItem *item);
 
     void addItemToLightList(int i, const std::string& light_type);
@@ -44,7 +44,6 @@ public:
 private:
     std::string getPenultimateWord(const QString& qstringPath);
 public slots:
-    void addLightButtonClicked();
     void addCubeButtonClicked();
     void addMeshButtonClicked();
 
@@ -60,7 +59,8 @@ private:
     void displayFPS();
 
     std::shared_ptr<QTimer> fpsUpdateTimer;
-    int i{0};
+    int counterLights{0};
+    int counterObjs{0};
     Ui::MainWindow* ui;
     OpenGLWidget* openglWidget;
     QStringListModel* listModel;
